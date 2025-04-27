@@ -1,0 +1,55 @@
+<ion-content class="ion-padding">
+  <div class="back-button" (click)="goBack()">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+  </div>
+
+  <div class="content-container">
+    <div class="header">
+      <h1>Enter Verification Code</h1>
+      <p class="subtitle">We have sent the code verification to your mobile number</p>
+    </div>
+
+    <form [formGroup]="verifyOtpForm" (ngSubmit)="onSubmit()">
+      <div class="otp-container">
+        <ng-container *ngFor="let control of otpControls; let i = index">
+          <input
+            type="text"
+            maxlength="1"
+            [formControlName]="'digit' + i"
+            class="otp-input"
+            (keyup)="onOtpChange($event, i)"
+            (paste)="onPaste($event)"
+            #otpInput
+          >
+        </ng-container>
+      </div>
+
+      <div class="illustration">
+        <img src="assets/images/Enter OTP-cuate.png" alt="Verification Illustration">
+      </div>
+      <div class="error-message-container" *ngIf="errorMessage">
+        <div class="error-message-content">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="continue-button"
+        [disabled]="isLoading || verifyOtpForm.invalid"
+      >
+        <ion-spinner *ngIf="isLoading"></ion-spinner>
+        <span *ngIf="!isLoading">Continue</span>
+      </button>
+    </form>
+
+
+    <div class="page-indicator">
+      <div class="indicator active"></div>
+      <div class="indicator active"></div>
+      <div class="indicator"></div>
+    </div>
+
+  </div>
+
+</ion-content>

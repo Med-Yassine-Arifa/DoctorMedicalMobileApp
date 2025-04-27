@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Admin Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="welcome-card">
+    <h1>Welcome, Admin</h1>
+    <p>Manage your medical application from this dashboard</p>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card" (click)="navigateTo('/admin/doctors')">
+      <div class="stat-icon">
+        <ion-icon name="people-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <h2>{{ doctorCount }}</h2>
+        <p>Doctors</p>
+      </div>
+    </div>
+
+    <!-- Add more stat cards here as needed -->
+  </div>
+
+  <div class="action-cards">
+    <div class="action-card" (click)="navigateTo('/admin/doctors')">
+      <ion-icon name="people-outline"></ion-icon>
+      <h3>Manage Doctors</h3>
+      <p>View, add, edit, or remove doctors</p>
+    </div>
+
+    <div class="action-card" (click)="navigateTo('/admin/doctors/create')">
+      <ion-icon name="person-add-outline"></ion-icon>
+      <h3>Add New Doctor</h3>
+      <p>Create a new doctor account</p>
+    </div>
+
+
+  </div>
+</ion-content>

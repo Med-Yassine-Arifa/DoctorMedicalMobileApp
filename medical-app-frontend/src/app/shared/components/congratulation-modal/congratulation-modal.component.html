@@ -1,0 +1,19 @@
+<div class="congratulation-modal">
+  <div class="modal-content">
+    <div class="illustration">
+      <div class="check-circle">
+        <ion-icon name="checkmark"></ion-icon>
+      </div>
+      <img src="assets/images/Congratulation.png" alt="Congratulations">
+    </div>
+
+    <div class="text-content">
+      <h2 class="title">{{ title }}</h2>
+      <p class="message">{{ message }}</p>
+    </div>
+
+    <ion-button expand="block" class="action-button" (click)="dismiss()">
+      {{ buttonText }}
+    </ion-button>
+  </div>
+</div>

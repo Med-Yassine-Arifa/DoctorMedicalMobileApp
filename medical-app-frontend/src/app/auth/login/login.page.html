@@ -1,0 +1,96 @@
+<ion-content class="ion-padding">
+  <div class="content-container">
+    <div class="logo-container">
+      <div class="logo">
+        <img src="assets/icon/logo.png" alt="WeCare Logo">
+      </div>
+      <h1 class="app-name">WECARE</h1>
+    </div>
+
+    <div class="header">
+      <h1>Login to Your Account</h1>
+      <p class="subtitle">Please sign in to continue</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="input-field">
+        <div class="icon-container">
+          <ion-icon name="mail-outline"></ion-icon>
+        </div>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message-container">
+      <div class="error-message-content" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Please enter a valid email address</span>
+      </div>
+      </div>
+
+      <div class="input-field">
+        <div class="icon-container">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+        </div>
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          placeholder="Password"
+          class="text-input"
+        >
+        <div class="toggle-icon" (click)="togglePasswordVisibility()">
+          <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </div>
+      </div>
+
+      <div class="error-message-container">
+      <div class="error-message-content" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Password must be at least 6 characters</span>
+      </div>
+      </div>
+      <div class="forgot-password">
+        <a (click)="goToForgotPassword()">Forgot password?</a>
+      </div>
+
+      <div class="error-message-container">
+      <div class="error-message-content" *ngIf="errorMessage">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+      </div>
+
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <ion-spinner *ngIf="isLoading"></ion-spinner>
+        <span *ngIf="!isLoading">Sign in</span>
+      </button>
+
+      <div class="divider">
+        <span>Or</span>
+      </div>
+
+      <button
+        type="button"
+        class="google-button"
+        [disabled]="isGoogleLoading"
+        (click)="signInWithGoogle()"
+      >
+        <ion-icon name="logo-google"></ion-icon>
+        <span *ngIf="!isGoogleLoading">Sign in with Google</span>
+        <ion-spinner *ngIf="isGoogleLoading"></ion-spinner>
+      </button>
+
+      <div class="signup-link">
+        <span>Don't have an account?</span>
+        <a (click)="goToSignup()">Sign up</a>
+      </div>
+    </form>
+  </div>
+</ion-content>

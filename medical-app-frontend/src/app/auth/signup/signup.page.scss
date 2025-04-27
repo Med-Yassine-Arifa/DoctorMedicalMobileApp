@@ -1,0 +1,136 @@
+@import '../../shared/styles/auth-common.scss';
+
+:host {
+  --primary-color: #7950f2;
+  --primary-light: #e9d8fd;
+  --text-color: #333;
+  --light-text-color: #666;
+  --background-color: #fff;
+  --error-color: #ff4757;
+  --success-color: #4cd964;
+  --border-color: #e0e0e0;
+}
+
+ion-content {
+  --background: var(--background-color);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.back-button {
+  padding: 15px 0 0 20px;
+  font-size: 24px;
+  color: var(--text-color);
+}
+
+.content-container {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 60px);
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  .logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 8px;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .app-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+    letter-spacing: 1px;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.signup-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.login-link {
+  text-align: center;
+  font-size: 14px;
+  margin-top: auto;
+  margin-bottom: 20px;
+
+  span {
+    color: var(--light-text-color);
+  }
+
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+}
+
+.page-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .indicator {
+    width: 20px;
+    height: 4px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+
+    &.active {
+      background-color: var(--primary-color);
+    }
+  }
+}

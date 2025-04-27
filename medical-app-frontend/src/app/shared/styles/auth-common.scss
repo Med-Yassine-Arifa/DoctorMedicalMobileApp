@@ -1,0 +1,213 @@
+// Common variables
+:host {
+  --primary-color: #7950f2;
+  --primary-light: #e9d8fd;
+  --text-color: #333;
+  --light-text-color: #666;
+  --background-color: #fff;
+  --error-color: #ff4757;
+  --success-color: #4cd964;
+  --border-color: #e0e0e0;
+}
+
+// Common animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Common content container
+.content-container {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+// Common header styles
+.header {
+  margin-top: 20px;
+  margin-bottom: 30px;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0 0 8px 0;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--light-text-color);
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+// Common input field styles
+.input-field, .password-field, .otp-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0 15px;
+  margin-bottom: 16px;
+  height: 56px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+
+  &.has-error {
+    border-color: var(--error-color);
+    background-color: rgba(255, 71, 87, 0.05);
+  }
+
+  .icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  .text-input, .password-input, .otp-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--text-color);
+    background: transparent;
+    height: 100%;
+
+    &::placeholder {
+      color: #999;
+      opacity: 1;
+    }
+  }
+
+  .toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 20px;
+    cursor: pointer;
+  }
+}
+
+// Common button styles
+.primary-button, .login-button, .signup-button, .verify-button, .continue-button, .reset-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.error-message-container {
+  margin: 8px 0 16px;
+
+  .error-message-content {
+    display: flex;
+    align-items: center;
+    color: var(--error-color);
+    font-size: 14px;
+    padding: 8px 12px;
+    background-color: rgba(255, 71, 87, 0.1);
+    border-radius: 8px;
+
+    ion-icon {
+      margin-right: 8px;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    span {
+      font-weight: 500;
+    }
+
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+
+// Common success message styles
+.success-message {
+  display: flex;
+  align-items: center;
+  color: var(--success-color);
+  font-size: 14px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  padding: 0 5px;
+  animation: fadeIn 0.3s ease-in-out;
+
+  ion-icon {
+    margin-right: 6px;
+    font-size: 18px;
+  }
+
+  span {
+    font-weight: 500;
+  }
+}
+
+// Common page indicator styles
+.page-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .indicator {
+    width: 20px;
+    height: 4px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+
+    &.active {
+      background-color: var(--primary-color);
+    }
+  }
+}
+
+// Common back button styles
+.back-button {
+  padding: 15px 0 0 20px;
+  font-size: 24px;
+  color: var(--text-color);
+}
+
+// Common illustration styles
+.illustration {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+
+  img {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+  }
+}

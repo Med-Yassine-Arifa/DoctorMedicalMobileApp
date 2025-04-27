@@ -1,0 +1,180 @@
+:host {
+  --primary-color: #7950f2;
+  --primary-light: #e9d8fd;
+  --text-color: #333;
+  --light-text-color: #666;
+  --background-color: #f5f7fa;
+  --card-background: #fff;
+  --border-color: #e0e0e0;
+  --danger-color: #ff4757;
+}
+
+ion-content {
+  --background: var(--background-color);
+}
+
+.search-container {
+  margin-bottom: 20px;
+
+  .search-box {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    ion-icon {
+      color: var(--light-text-color);
+      font-size: 20px;
+
+      &:last-child {
+        cursor: pointer;
+      }
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      color: var(--text-color);
+      background: transparent;
+      height: 100%;
+      margin: 0 12px;
+
+      &::placeholder {
+        color: #999;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background-color: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+
+    ion-icon {
+      font-size: 40px;
+      color: var(--primary-color);
+    }
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0 0 12px 0;
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--light-text-color);
+    margin: 0 0 24px 0;
+    max-width: 300px;
+  }
+
+  .add-button {
+    --background: var(--primary-color);
+    --color: white;
+    --border-radius: 12px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-weight: 600;
+    margin-top: 16px;
+  }
+}
+
+.doctors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .doctor-card {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    .doctor-info {
+      flex: 1;
+
+      h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0 0 4px 0;
+      }
+
+      .email {
+        font-size: 14px;
+        color: var(--light-text-color);
+        margin: 0 0 8px 0;
+      }
+
+      .specialization {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--primary-color);
+        margin: 0 0 12px 0;
+      }
+
+      .details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        p {
+          font-size: 14px;
+          color: var(--light-text-color);
+          margin: 0;
+          display: flex;
+          align-items: center;
+
+          ion-icon {
+            margin-right: 6px;
+          }
+        }
+      }
+    }
+
+    .doctor-actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      ion-button {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        height: 36px;
+
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+}
+
+ion-fab-button {
+  --background: var(--primary-color);
+  --color: white;
+}
