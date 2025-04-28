@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DoctorService } from 'src/app/services/doctor.service';
-import {AvailabilitySlot , DoctorUser} from "../../../models/user.model";
+import { DoctorService} from "../../../services/doctor.service";
+import { AvailabilitySlot , DoctorUser} from "../../../models/user.model";
 import { addIcons } from 'ionicons';
 import {
   checkmarkOutline,

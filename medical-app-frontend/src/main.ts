@@ -8,9 +8,10 @@ import { AppComponent } from './app/app.component';
 import {authInterceptor} from "./app/interceptor/auth.interceptor";
 import {environment} from "./environments/environment";
 import {initializeApp} from "firebase/app";
+import {getAuth} from "firebase/auth";
 
 const app = initializeApp(environment.firebase);
-
+const auth = getAuth(app);
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },

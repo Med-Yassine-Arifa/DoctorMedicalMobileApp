@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -16,6 +16,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DoctorUser } from '../../../models/user.model';
 import { InfiniteScrollCustomEvent } from '@ionic/core';
+import { Subscription } from 'rxjs';
+import { getAuth } from 'firebase/auth';
 
 @Component({
   selector: 'app-doctors-list',
@@ -24,13 +26,14 @@ import { InfiniteScrollCustomEvent } from '@ionic/core';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class DoctorsListPage implements OnInit {
+export class DoctorsListPage implements OnInit, OnDestroy {
   doctors: DoctorUser[] = [];
   filteredDoctors: DoctorUser[] = [];
   searchTerm = '';
   isLoading = false;
   page = 1;
   limit = 10;
+  private doctorUpdateSubscription: Subscription;
 
   constructor(
     private router: Router,
@@ -48,13 +51,27 @@ export class DoctorsListPage implements OnInit {
       closeCircleOutline,
       refreshOutline
     });
+    this.doctorUpdateSubscription = this.doctorService.doctorListUpdated$.subscribe(() => {
+      this.refresh();
+    });
   }
 
   ngOnInit() {
-    this.loadDoctors().then(r => {});
+    this.loadDoctors();
+  }
+
+  ngOnDestroy() {
+    this.doctorUpdateSubscription.unsubscribe();
   }
 
   async loadDoctors(event?: InfiniteScrollCustomEvent) {
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      await this.presentToast('Please log in to view doctors.', 'danger');
+      this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+      return;
+    }
+
     const loading = await this.loadingController.create({
       message: 'Loading doctors...',
       spinner: 'circles'
@@ -78,11 +95,16 @@ export class DoctorsListPage implements OnInit {
         }
         this.page++;
       },
-      error: (error) => {
+      error: async (error) => {
         console.error('Error loading doctors:', error);
         this.isLoading = false;
         loading.dismiss();
-        this.presentToast('Failed to load doctors. Please try again.', 'danger');
+        if (error.status === 401) {
+          await this.presentToast('Unauthorized access. Please log in again.', 'danger');
+          this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+        } else {
+          await this.presentToast('Failed to load doctors. Please try again.', 'danger');
+        }
         if (event) {
           event.target.complete();
         }
@@ -146,13 +168,17 @@ export class DoctorsListPage implements OnInit {
       next: () => {
         loading.dismiss();
         this.presentToast('Doctor deleted successfully', 'success');
-        this.doctors = this.doctors.filter(d => d.firebaseUid !== doctorId);
-        this.filteredDoctors = this.filteredDoctors.filter(d => d.firebaseUid !== doctorId);
+        this.doctorService.notifyDoctorListUpdate();
       },
-      error: (error) => {
+      error: async (error) => {
         loading.dismiss();
         console.error('Error deleting doctor:', error);
-        this.presentToast('Failed to delete doctor. Please try again.', 'danger');
+        if (error.status === 401) {
+          await this.presentToast('Unauthorized access. Please log in again.', 'danger');
+          this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+        } else {
+          await this.presentToast('Failed to delete doctor. Please try again.', 'danger');
+        }
       }
     });
   }
