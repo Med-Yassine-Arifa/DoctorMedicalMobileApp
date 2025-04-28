@@ -6,7 +6,6 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { User, PatientUser, AdminUser , DoctorUser} from '../models/user.model';
 import { StorageUtil } from '../utils/storage.util';
-
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
@@ -14,21 +13,9 @@ import {
   GoogleAuthProvider,
   Auth,
   signOut,
-  signInWithCustomToken
+  signInWithCustomToken,
+  signInWithEmailAndPassword
 } from 'firebase/auth';
-
-interface LoginResponse {
-  message: string;
-  role: 'patient' | 'doctor' | 'admin';
-  userId: string;
-  token: string;  // Custom token for email/password login
-}
-
-interface RegisterResponse {
-  message: string;
-  role: string;
-  userId: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +24,6 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(null);
   public user$ = this.userSubject.asObservable();
   private auth: Auth;
-  private customToken: string | null = null;
 
   constructor(
     private router: Router,
@@ -51,67 +37,49 @@ export class AuthService {
 
   private async initializeAuthState() {
     const storedUser = await this.storageUtil.get<User>('user');
-    const storedToken = await this.storageUtil.get<string>('customToken');
     if (storedUser) {
       this.userSubject.next(storedUser);
-    }
-    if (storedToken) {
-      this.customToken = storedToken;
-      // Sign in with the custom token to initialize Firebase Auth state
-      from(signInWithCustomToken(this.auth, storedToken)).subscribe({
-        error: (err) => console.error('Failed to sign in with stored custom token:', err)
-      });
     }
   }
 
   login(email: string, password: string): Observable<User> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
-      switchMap(response => {
-        this.customToken = response.token;
-        this.storageUtil.set('customToken', response.token);
-        // Sign in with the custom token to initialize Firebase Auth state
-        return from(signInWithCustomToken(this.auth, response.token)).pipe(
-          map(() => {
-            let userData: User;
-            if (response.role === 'patient') {
-              userData = {
-                firebaseUid: response.userId,
+    return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
+      switchMap(userCredential => {
+        return from(userCredential.user.getIdTokenResult(true)).pipe(
+          tap(idTokenResult => {
+            console.warn('ID Token:', idTokenResult.token);
+            console.warn('User ID:', userCredential.user.uid);
+            console.warn('Role:', idTokenResult.claims['role'] || 'Not found');
+          }),
+          map(idTokenResult => {
+            const role = idTokenResult.claims['role'] as 'patient' | 'doctor' | 'admin';
+            if (!role) {
+              throw new Error('Role not found in token');
+            }
+            let user: User;
+            if (role === 'patient') {
+              user = {
+                firebaseUid: userCredential.user.uid,
                 email: email,
                 role: 'patient',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                profile: {
-                  firstName: '',
-                  lastName: '',
-                  phone: '',
-                  address: ''
-                }
+                profile: { firstName: '', lastName: '', phone: '', address: '' }
               } as PatientUser;
-            } else if (response.role === 'doctor') {
-              userData = {
-                firebaseUid: response.userId,
+            } else if (role === 'doctor') {
+              user = {
+                firebaseUid: userCredential.user.uid,
                 email: email,
                 role: 'doctor',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                profile: {
-                  firstName: '',
-                  lastName: '',
-                  phone: '',
-                  address: '',
-                  specialization: '',
-                  licenseNumber: ''
-                },
+                profile: { firstName: '', lastName: '', phone: '', address: '', specialization: '', licenseNumber: '' },
                 availability: []
               } as DoctorUser;
             } else {
-              userData = {
-                firebaseUid: response.userId,
+              user = {
+                firebaseUid: userCredential.user.uid,
                 email: email,
-                role: 'admin',
+                role: 'admin'
               } as AdminUser;
             }
-            return userData;
+            return user;
           }),
           tap(user => {
             this.userSubject.next(user);
@@ -122,8 +90,10 @@ export class AuthService {
       catchError(error => {
         console.error('Login error:', error);
         let errorMessage = 'Invalid email or password. Please try again.';
-        if (error.error?.error) {
-          errorMessage = error.error.error;
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          errorMessage = 'Invalid email or password.';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many attempts. Please try again later.';
         }
         return throwError(() => new Error(errorMessage));
       })
@@ -141,34 +111,14 @@ export class AuthService {
     const payload = {
       email: userData.email,
       password: userData.password,
-      role: 'patient',
       firstName: userData.firstName,
       lastName: userData.lastName,
       phone: userData.phone || '',
       address: userData.address || ''
     };
 
-    return this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, payload).pipe(
-      map(response => {
-        const newUser: PatientUser = {
-          firebaseUid: response.userId,
-          email: userData.email,
-          role: 'patient',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          profile: {
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            phone: userData.phone || '',
-            address: userData.address || ''
-          }
-        };
-        return newUser;
-      }),
-      tap(user => {
-        this.userSubject.next(user);
-        this.storageUtil.set('user', user);
-      }),
+    return this.http.post<{ message: string; role: string; userId: string }>(`${environment.apiUrl}/auth/register`, payload).pipe(
+      switchMap(() => this.login(userData.email, userData.password)),
       catchError(error => {
         console.error('Registration error:', error);
         let errorMessage = 'Registration failed. Please try again.';
@@ -184,17 +134,14 @@ export class AuthService {
     const provider = new GoogleAuthProvider();
     return from(signInWithPopup(this.auth, provider)).pipe(
       switchMap(userCredential => {
-        const userId = userCredential.user.uid;
-        return from(userCredential.user.getIdToken(true)).pipe(
-          switchMap(idToken => {
-            return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/google-login`, { idToken }).pipe(
+        return from(userCredential.user.getIdTokenResult(true)).pipe(
+          switchMap(idTokenResult => {
+            return this.http.post<{ message: string; role: string; userId: string }>(`${environment.apiUrl}/auth/google-login`, { idToken: idTokenResult.token }).pipe(
               map(response => {
-                const userData: PatientUser = {
-                  firebaseUid: userId,
+                const user: PatientUser = {
+                  firebaseUid: userCredential.user.uid,
                   email: userCredential.user.email || '',
                   role: 'patient',
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
                   profile: {
                     firstName: userCredential.user.displayName?.split(' ')[0] || '',
                     lastName: userCredential.user.displayName?.split(' ').slice(1).join(' ') || '',
@@ -202,7 +149,7 @@ export class AuthService {
                     address: ''
                   }
                 };
-                return userData;
+                return user;
               }),
               tap(user => {
                 this.userSubject.next(user);
@@ -263,8 +210,6 @@ export class AuthService {
   }
 
   signOut(): Observable<void> {
-    this.customToken = null;
-    this.storageUtil.remove('customToken');
     return from(signOut(this.auth)).pipe(
       tap(() => {
         this.userSubject.next(null);
@@ -277,6 +222,7 @@ export class AuthService {
       })
     );
   }
+
 
   getCurrentUser(): User | null {
     return this.userSubject.value;

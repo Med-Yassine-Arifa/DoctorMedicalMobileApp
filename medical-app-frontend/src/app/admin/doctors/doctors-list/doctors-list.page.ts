@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor.service';
-
 import { addIcons } from 'ionicons';
 import {
   addOutline,
@@ -15,7 +14,8 @@ import {
   refreshOutline
 } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
-import {DoctorUser} from "../../../models/user.model";
+import { DoctorUser } from '../../../models/user.model';
+import { InfiniteScrollCustomEvent } from '@ionic/core';
 
 @Component({
   selector: 'app-doctors-list',
@@ -29,13 +29,15 @@ export class DoctorsListPage implements OnInit {
   filteredDoctors: DoctorUser[] = [];
   searchTerm = '';
   isLoading = false;
+  page = 1;
+  limit = 10;
 
   constructor(
-      private router: Router,
-      private doctorService: DoctorService,
-      private alertController: AlertController,
-      private loadingController: LoadingController,
-      private toastController: ToastController
+    private router: Router,
+    private doctorService: DoctorService,
+    private alertController: AlertController,
+    private loadingController: LoadingController,
+    private toastController: ToastController
   ) {
     addIcons({
       addOutline,
@@ -49,10 +51,10 @@ export class DoctorsListPage implements OnInit {
   }
 
   ngOnInit() {
-   // this.loadDoctors();
+    this.loadDoctors().then(r => {});
   }
-/*
-  async loadDoctors() {
+
+  async loadDoctors(event?: InfiniteScrollCustomEvent) {
     const loading = await this.loadingController.create({
       message: 'Loading doctors...',
       spinner: 'circles'
@@ -62,16 +64,28 @@ export class DoctorsListPage implements OnInit {
     this.isLoading = true;
     this.doctorService.getAllDoctors().subscribe({
       next: (doctors) => {
-        this.doctors = doctors;
-        this.filteredDoctors = [...doctors];
+        const start = (this.page - 1) * this.limit;
+        const newDoctors = doctors.slice(start, start + this.limit);
+        this.doctors = [...this.doctors, ...newDoctors];
+        this.filteredDoctors = [...this.doctors];
         this.isLoading = false;
         loading.dismiss();
+        if (event) {
+          event.target.complete();
+          if (newDoctors.length < this.limit) {
+            event.target.disabled = true;
+          }
+        }
+        this.page++;
       },
       error: (error) => {
         console.error('Error loading doctors:', error);
         this.isLoading = false;
         loading.dismiss();
         this.presentToast('Failed to load doctors. Please try again.', 'danger');
+        if (event) {
+          event.target.complete();
+        }
       }
     });
   }
@@ -81,13 +95,12 @@ export class DoctorsListPage implements OnInit {
       this.filteredDoctors = [...this.doctors];
       return;
     }
-
     const term = this.searchTerm.toLowerCase();
     this.filteredDoctors = this.doctors.filter(doctor =>
-        doctor.email.toLowerCase().includes(term) ||
-        doctor.profile.firstName.toLowerCase().includes(term) ||
-        doctor.profile.lastName.toLowerCase().includes(term) ||
-        (doctor.profile.specialization && doctor.profile.specialization.toLowerCase().includes(term))
+      doctor.email.toLowerCase().includes(term) ||
+      doctor.profile.firstName.toLowerCase().includes(term) ||
+      doctor.profile.lastName.toLowerCase().includes(term) ||
+      (doctor.profile.specialization && doctor.profile.specialization.toLowerCase().includes(term))
     );
   }
 
@@ -103,26 +116,22 @@ export class DoctorsListPage implements OnInit {
   navigateToEdit(doctorId: string) {
     this.router.navigateByUrl(`/admin/doctors/edit/${doctorId}`);
   }
-/*
+
   async confirmDelete(doctor: DoctorUser) {
     const alert = await this.alertController.create({
       header: 'Confirm Delete',
       message: `Are you sure you want to delete Dr. ${doctor.profile.firstName} ${doctor.profile.lastName}?`,
       buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
+        { text: 'Cancel', role: 'cancel' },
         {
           text: 'Delete',
           role: 'destructive',
           handler: () => {
-            this.deleteDoctor(doctor.id);
+            this.deleteDoctor(doctor.firebaseUid);
           }
         }
       ]
     });
-
     await alert.present();
   }
 
@@ -137,9 +146,8 @@ export class DoctorsListPage implements OnInit {
       next: () => {
         loading.dismiss();
         this.presentToast('Doctor deleted successfully', 'success');
-        // Remove the doctor from the list
-        this.doctors = this.doctors.filter(d => d.id !== doctorId);
-        this.filteredDoctors = this.filteredDoctors.filter(d => d.id !== doctorId);
+        this.doctors = this.doctors.filter(d => d.firebaseUid !== doctorId);
+        this.filteredDoctors = this.filteredDoctors.filter(d => d.firebaseUid !== doctorId);
       },
       error: (error) => {
         loading.dismiss();
@@ -149,7 +157,7 @@ export class DoctorsListPage implements OnInit {
     });
   }
 
-  async presentToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+  async presentToast(message: string, color: 'success' | 'danger') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
@@ -164,6 +172,9 @@ export class DoctorsListPage implements OnInit {
   }
 
   refresh() {
+    this.page = 1;
+    this.doctors = [];
+    this.filteredDoctors = [];
     this.loadDoctors();
-  }*/
+  }
 }

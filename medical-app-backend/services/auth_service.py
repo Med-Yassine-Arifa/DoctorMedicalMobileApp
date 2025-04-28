@@ -40,12 +40,9 @@ def validate_otp(user, otp):
     return True
 
 def create_user_account(email, password, role, profile_data, google_id=None, firebase_uid=None):
-    hashed_password = hash_password(password) if password else None
-
     user = {
         'firebaseUid': firebase_uid,
         'email': email,
-        'password': hashed_password,
         'googleId': google_id,
         'role': role,
         'profile': {
@@ -55,17 +52,15 @@ def create_user_account(email, password, role, profile_data, google_id=None, fir
             'address': profile_data.get('address', '')
         },
         'fcmToken': '',
-        'createdAt': datetime.utcnow(),
-        'updatedAt': datetime.utcnow()
+        'createdAt': datetime.now(UTC),
+        'updatedAt': datetime.now(UTC)
     }
     return create_user(user)
 
 def create_doctor_account(email, password, role, profile_data, availability, google_id=None, firebase_uid=None):
-    hashed_password = hash_password(password) if password else None
     user = {
         'firebaseUid': firebase_uid,
         'email': email,
-        'password': hashed_password,
         'googleId': google_id,
         'role': role,
         'profile': {
@@ -78,8 +73,7 @@ def create_doctor_account(email, password, role, profile_data, availability, goo
         },
         'availability': availability,
         'fcmToken': '',
-        'createdAt': datetime.utcnow(),
-        'updatedAt': datetime.utcnow()
+        'createdAt': datetime.now(UTC),
+        'updatedAt': datetime.now(UTC)
     }
     return create_user(user)
-

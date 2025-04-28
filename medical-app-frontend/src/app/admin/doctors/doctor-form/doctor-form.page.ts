@@ -1,26 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, LoadingController, ToastController, AlertController } from '@ionic/angular';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DoctorService } from '../../../services/doctor.service';
-import { AvailabilitySlot, DoctorUser } from '../../../models/user.model';
-
+import { DoctorService } from 'src/app/services/doctor.service';
+import {AvailabilitySlot , DoctorUser} from "../../../models/user.model";
 import { addIcons } from 'ionicons';
 import {
-  arrowBackOutline,
-  saveOutline,
-  addOutline,
-  trashOutline,
+  checkmarkOutline,
+  closeOutline,
   calendarOutline,
-  timeOutline,
-  mailOutline,
-  lockClosedOutline as lockOutline,
   personOutline,
+  mailOutline,
+  lockClosedOutline,
   callOutline,
   locationOutline,
   medkitOutline,
-  cardOutline
+  cardOutline,
+  addOutline,
+  trashOutline,
+  timeOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -28,258 +27,169 @@ import {
   templateUrl: './doctor-form.page.html',
   styleUrls: ['./doctor-form.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class DoctorFormPage implements OnInit {
   doctorForm: FormGroup;
+  doctor: DoctorUser = {
+    firebaseUid: '',
+    email: '',
+    role: 'doctor',
+    profile: {
+      firstName: '',
+      lastName: '',
+      phone: '',
+      address: '',
+      specialization: '',
+      licenseNumber: ''
+    },
+    availability: []
+  };
   isEditMode = false;
   doctorId: string | null = null;
-  pageTitle = 'Add New Doctor';
   weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  specializations = [
+    'Neurologist', 'Cardiologist', 'Dermatologist', 'Obstetrics and gynaecology', 'Oncologist',
+    'Endocrinologist', 'General surgery', 'Psychiatrist', 'Ophthalmologist', 'Emergency medicine',
+    'Family medicine', 'Gastroenterologist', 'Pediatrics', 'Radiologist', 'Orthopaedist',
+    'Pathology', 'Allergist', 'Anesthesiology', 'Hematologist', 'Immunology',
+    'Internal medicine', 'Nephrologist', 'Pulmonologist', 'Anesthesiologist'
+  ];
 
   constructor(
-    private formBuilder: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
     private doctorService: DoctorService,
-    private loadingController: LoadingController,
     private toastController: ToastController,
-    private alertController: AlertController
+    private fb: FormBuilder
   ) {
-    this.doctorForm = this.createDoctorForm();
-
     addIcons({
-      arrowBackOutline,
-      saveOutline,
-      addOutline,
-      trashOutline,
+      checkmarkOutline,
+      closeOutline,
       calendarOutline,
-      timeOutline,
-      mailOutline,
-      lockOutline,
       personOutline,
+      mailOutline,
+      lockClosedOutline,
       callOutline,
       locationOutline,
       medkitOutline,
-      cardOutline
+      cardOutline,
+      addOutline,
+      trashOutline,
+      timeOutline
+    });
+    this.doctorForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      profile: this.fb.group({
+        firstName: ['', Validators.required],
+        lastName: ['', Validators.required],
+        phone: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
+        address: ['', Validators.required],
+        specialization: ['', Validators.required],
+        licenseNumber: ['', [Validators.required, Validators.pattern(/^\d{15}$/)]]
+      }),
+      availability: this.fb.array([])
     });
   }
 
   ngOnInit() {
     this.doctorId = this.route.snapshot.paramMap.get('id');
-    this.isEditMode = !!this.doctorId;
-
-    if (this.isEditMode) {
-      this.pageTitle = 'Edit Doctor';
-      this.loadDoctorData();
+    if (this.doctorId) {
+      this.isEditMode = true;
+      this.doctorForm.get('password')?.clearValidators();
+      this.doctorForm.get('password')?.updateValueAndValidity();
+      this.loadDoctor();
     }
-  }
-
-  createDoctorForm(): FormGroup {
-    return this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(6)]],
-      profile: this.formBuilder.group({
-        firstName: ['', Validators.required],
-        lastName: ['', Validators.required],
-        phone: ['', Validators.required],
-        address: ['', Validators.required],
-        specialization: ['', Validators.required],
-        licenseNumber: ['', Validators.required]
-      }),
-      availability: this.formBuilder.array([])
-    });
   }
 
   get availabilityArray(): FormArray {
     return this.doctorForm.get('availability') as FormArray;
   }
 
-  addAvailabilitySlot() {
-    const availabilityGroup = this.formBuilder.group({
-      day: ['Monday', Validators.required],
-      startTime: ['09:00', Validators.required],
-      endTime: ['17:00', Validators.required]
-    });
+  loadDoctor() {
+    if (this.doctorId) {
+      this.doctorService.getDoctor(this.doctorId).subscribe({
+        next: (doctor) => {
+          this.doctor = doctor;
+          this.doctorForm.patchValue({
+            email: doctor.email,
+            profile: doctor.profile
+          });
+          doctor.availability.forEach(slot => {
+            this.availabilityArray.push(this.createAvailabilitySlot(slot));
+          });
+        },
+        error: (error:any) => {
+          console.error('Error loading doctor:', error);
+          this.presentToast('Failed to load doctor', 'danger');
+        }
+      });
+    }
+  }
 
-    this.availabilityArray.push(availabilityGroup);
+  createAvailabilitySlot(slot: AvailabilitySlot = { day: '', startTime: '', endTime: '' }): FormGroup {
+    return this.fb.group({
+      day: [slot.day, Validators.required],
+      startTime: [slot.startTime, Validators.required],
+      endTime: [slot.endTime, Validators.required]
+    });
+  }
+
+  addAvailabilitySlot() {
+    this.availabilityArray.push(this.createAvailabilitySlot());
   }
 
   removeAvailabilitySlot(index: number) {
     this.availabilityArray.removeAt(index);
   }
 
-  async loadDoctorData() {
-    if (!this.doctorId) return;
-
-    const loading = await this.loadingController.create({
-      message: 'Loading doctor data...',
-      spinner: 'circles'
-    });
-    await loading.present();
-
-    this.doctorService.getDoctor(this.doctorId).subscribe({
-      next: (doctor: DoctorUser) => {
-        if (doctor) {
-          // Remove password field validators for edit mode
-          this.doctorForm.get('password')?.clearValidators();
-          this.doctorForm.get('password')?.updateValueAndValidity();
-
-          // Patch form values
-          this.doctorForm.patchValue({
-            email: doctor.email,
-            profile: {
-              firstName: doctor.profile.firstName,
-              lastName: doctor.profile.lastName,
-              phone: doctor.profile.phone,
-              address: doctor.profile.address,
-              specialization: doctor.profile.specialization,
-              licenseNumber: doctor.profile.licenseNumber
-            }
-          });
-
-          // Clear and add availability slots
-          this.availabilityArray.clear();
-          if (doctor.availability && doctor.availability.length > 0) {
-            doctor.availability.forEach(slot => {
-              this.availabilityArray.push(
-                this.formBuilder.group({
-                  day: [slot.day, Validators.required],
-                  startTime: [slot.startTime, Validators.required],
-                  endTime: [slot.endTime, Validators.required]
-                })
-              );
-            });
-          }
-        } else {
-          this.presentToast('Doctor not found', 'danger');
-          this.router.navigateByUrl('/admin/doctors');
-        }
-        loading.dismiss();
-      },
-      error: (error) => {
-        console.error('Error loading doctor:', error);
-        loading.dismiss();
-        this.presentToast(error.message || 'Failed to load doctor data', 'danger');
-        this.router.navigateByUrl('/admin/doctors');
-      }
-    });
-  }
-
-  async onSubmit() {
+  submitForm() {
     if (this.doctorForm.invalid) {
-      this.markFormGroupTouched(this.doctorForm);
-      this.presentToast('Please fill in all required fields correctly', 'warning');
+      this.doctorForm.markAllAsTouched();
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: this.isEditMode ? 'Updating doctor...' : 'Creating doctor...',
-      spinner: 'circles'
-    });
-    await loading.present();
-
-    const formData = this.doctorForm.value;
     const doctorData = {
-      email: formData.email,
-      password: formData.password || undefined, // Omit password if empty
-      firstName: formData.profile.firstName,
-      lastName: formData.profile.lastName,
-      phone: formData.profile.phone,
-      address: formData.profile.address,
-      specialization: formData.profile.specialization,
-      licenseNumber: formData.profile.licenseNumber,
-      availability: formData.availability
+      email: this.doctorForm.value.email,
+      password: this.isEditMode ? undefined : this.doctorForm.value.password,
+      firstName: this.doctorForm.value.profile.firstName,
+      lastName: this.doctorForm.value.profile.lastName,
+      phone: this.doctorForm.value.profile.phone,
+      address: this.doctorForm.value.profile.address,
+      specialization: this.doctorForm.value.profile.specialization,
+      licenseNumber: this.doctorForm.value.profile.licenseNumber,
+      availability: this.doctorForm.value.availability
     };
 
     if (this.isEditMode && this.doctorId) {
       this.doctorService.updateDoctor(this.doctorId, doctorData).subscribe({
         next: () => {
-          loading.dismiss();
           this.presentToast('Doctor updated successfully', 'success');
+          this.doctorService.notifyDoctorListUpdate();
           this.router.navigateByUrl('/admin/doctors');
         },
-        error: (error) => {
-          loading.dismiss();
+        error: (error:any) => {
           console.error('Error updating doctor:', error);
-          this.presentToast(error.message || 'Failed to update doctor', 'danger');
+          this.presentToast('Failed to update doctor', 'danger');
         }
       });
     } else {
       this.doctorService.createDoctor(doctorData).subscribe({
         next: () => {
-          loading.dismiss();
           this.presentToast('Doctor created successfully', 'success');
+          this.doctorService.notifyDoctorListUpdate();
           this.router.navigateByUrl('/admin/doctors');
         },
-        error: (error) => {
-          loading.dismiss();
+        error: (error:any) => {
           console.error('Error creating doctor:', error);
-          this.presentToast(error.message || 'Failed to create doctor', 'danger');
+          this.presentToast('Failed to create doctor', 'danger');
         }
       });
     }
   }
 
-  async deleteDoctor() {
-    if (!this.doctorId) return;
-
-    const alert = await this.alertController.create({
-      header: 'Confirm Deletion',
-      message: 'Are you sure you want to delete this doctor? This action cannot be undone.',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Delete',
-          role: 'destructive',
-          handler: async () => {
-            const loading = await this.loadingController.create({
-              message: 'Deleting doctor...',
-              spinner: 'circles'
-            });
-            await loading.present();
-
-            this.doctorService.deleteDoctor(this.doctorId!).subscribe({
-              next: () => {
-                loading.dismiss();
-                this.presentToast('Doctor deleted successfully', 'success');
-                this.router.navigateByUrl('/admin/doctors');
-              },
-              error: (error) => {
-                loading.dismiss();
-                console.error('Error deleting doctor:', error);
-                this.presentToast(error.message || 'Failed to delete doctor', 'danger');
-              }
-            });
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  markFormGroupTouched(formGroup: FormGroup) {
-    Object.values(formGroup.controls).forEach(control => {
-      control.markAsTouched();
-
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      } else if (control instanceof FormArray) {
-        control.controls.forEach((arrayControl: any) => {
-          if (arrayControl instanceof FormGroup) {
-            this.markFormGroupTouched(arrayControl);
-          } else {
-            arrayControl.markAsTouched();
-          }
-        });
-      }
-    });
-  }
-
-  async presentToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+  async presentToast(message: string, color: 'success' | 'danger') {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
@@ -289,7 +199,7 @@ export class DoctorFormPage implements OnInit {
     await toast.present();
   }
 
-  goBack() {
+  cancel() {
     this.router.navigateByUrl('/admin/doctors');
   }
 }

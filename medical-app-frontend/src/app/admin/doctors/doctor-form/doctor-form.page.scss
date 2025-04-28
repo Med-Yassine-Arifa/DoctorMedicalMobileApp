@@ -162,35 +162,68 @@ form {
     display: flex;
     align-items: center;
     gap: 12px;
+    background: linear-gradient(135deg, #ffffff, var(--primary-light));
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
 
     .slot-fields {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
 
       @media (min-width: 576px) {
         flex-direction: row;
-        gap: 12px;
+        gap: 16px;
       }
 
       .slot-field {
         display: flex;
         align-items: center;
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0 15px;
+        border-radius: 8px;
+        padding: 0 12px;
         height: 48px;
         background-color: #fff;
         flex: 1;
+        transition: border-color 0.3s ease;
+
+        &:focus-within {
+          border-color: var(--primary-color);
+        }
 
         .icon-container {
           display: flex;
           align-items: center;
           justify-content: center;
           color: var(--primary-color);
-          margin-right: 10px;
+          margin-right: 8px;
           font-size: 18px;
+        }
+
+        .select-input, .time-input {
+          flex: 1;
+          border: none;
+          outline: none;
+          font-size: 14px;
+          color: var(--text-color);
+          background: transparent;
+          height: 100%;
+        }
+
+        .select-input {
+          appearance: none;
+          background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237950f2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 8px center;
+          padding-right: 24px;
         }
       }
     }
@@ -198,11 +231,15 @@ form {
     ion-button {
       --padding-start: 8px;
       --padding-end: 8px;
-      height: 48px;
+      height: 40px;
       margin: 0;
+      --background: var(--error-color);
+      --background-activated: #d93e4a;
+      --color: #fff;
+      border-radius: 8px;
 
       ion-icon {
-        font-size: 20px;
+        font-size: 18px;
       }
     }
   }

@@ -1,85 +1,88 @@
-<!--<ion-header>
-    <ion-toolbar>
-        <ion-buttons slot="start">
-            <ion-button (click)="goBack()">
-                <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
-            </ion-button>
-        </ion-buttons>
-        <ion-title>Manage Doctors</ion-title>
-        <ion-buttons slot="end">
-            <ion-button (click)="refresh()">
-                <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-            </ion-button>
-            <ion-button (click)="navigateToCreate()">
-                <ion-icon slot="icon-only" name="add-outline"></ion-icon>
-            </ion-button>
-        </ion-buttons>
-    </ion-toolbar>
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Manage Doctors</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refresh()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="navigateToCreate()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-    <div class="search-container">
-        <div class="search-box">
-            <ion-icon name="search-outline"></ion-icon>
-            <input
-                    type="text"
-                    [(ngModel)]="searchTerm"
-                    (input)="filterDoctors()"
-                    placeholder="Search by name, email, or specialization"
-            >
-            <ion-icon
-                    *ngIf="searchTerm"
-                    name="close-circle-outline"
-                    (click)="clearSearch()"
-            ></ion-icon>
-        </div>
+  <div class="search-container">
+    <div class="search-box">
+      <ion-icon name="search-outline"></ion-icon>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="filterDoctors()"
+        placeholder="Search by name, email, or specialization"
+      >
+      <ion-icon
+        *ngIf="searchTerm"
+        name="close-circle-outline"
+        (click)="clearSearch()"
+      ></ion-icon>
     </div>
+  </div>
 
-    <div class="empty-state" *ngIf="!isLoading && filteredDoctors.length === 0">
-        <div class="empty-icon">
-            <ion-icon name="people-outline"></ion-icon>
+  <div class="empty-state" *ngIf="!isLoading && filteredDoctors.length === 0">
+    <div class="empty-icon">
+      <ion-icon name="people-outline"></ion-icon>
+    </div>
+    <h2>No Doctors Found</h2>
+    <p *ngIf="searchTerm">No results match your search criteria. Try a different search term.</p>
+    <p *ngIf="!searchTerm">You haven't added any doctors yet. Click the button below to add your first doctor.</p>
+    <ion-button (click)="navigateToCreate()" expand="block" class="add-button">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Add New Doctor
+    </ion-button>
+  </div>
+
+  <div class="doctors-list" *ngIf="filteredDoctors.length > 0">
+    <div class="doctor-card" *ngFor="let doctor of filteredDoctors" (click)="navigateToEdit(doctor.firebaseUid)">
+      <div class="doctor-info">
+        <h2>Dr. {{ doctor.profile.firstName }} {{ doctor.profile.lastName }}</h2>
+        <p class="email">{{ doctor.email }}</p>
+        <p class="specialization" *ngIf="doctor.profile.specialization">
+          {{ doctor.profile.specialization }}
+        </p>
+        <div class="details">
+          <p *ngIf="doctor.profile.phone">
+            <ion-icon name="call-outline"></ion-icon> {{ doctor.profile.phone }}
+          </p>
+          <p *ngIf="doctor.profile.licenseNumber">
+            <ion-icon name="card-outline"></ion-icon> License: {{ doctor.profile.licenseNumber }}
+          </p>
         </div>
-        <h2>No Doctors Found</h2>
-        <p *ngIf="searchTerm">No results match your search criteria. Try a different search term.</p>
-        <p *ngIf="!searchTerm">You haven't added any doctors yet. Click the button below to add your first doctor.</p>
-        <ion-button (click)="navigateToCreate()" expand="block" class="add-button">
-            <ion-icon name="add-outline" slot="start"></ion-icon>
-            Add New Doctor
+      </div>
+      <div class="doctor-actions">
+        <ion-button fill="clear" color="danger" (click)="confirmDelete(doctor); $event.stopPropagation()">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
         </ion-button>
+      </div>
     </div>
+  </div>
 
-    <div class="doctors-list" *ngIf="filteredDoctors.length > 0">
-        <div class="doctor-card" *ngFor="let doctor of filteredDoctors">
-            <div class="doctor-info">
-                <h2>Dr. {{ doctor.profile.firstName }} {{ doctor.profile.lastName }}</h2>
-                <p class="email">{{ doctor.email }}</p>
-                <p class="specialization" *ngIf="doctor.profile.specialization">
-                    {{ doctor.profile.specialization }}
-                </p>
-                <div class="details">
-                    <p *ngIf="doctor.profile.phone">
-                        <ion-icon name="call-outline"></ion-icon> {{ doctor.profile.phone }}
-                    </p>
-                    <p *ngIf="doctor.profile.licenseNumber">
-                        <ion-icon name="card-outline"></ion-icon> License: {{ doctor.profile.licenseNumber }}
-                    </p>
-                </div>
-            </div>
-            <div class="doctor-actions">
-                <ion-button fill="clear" (click)="navigateToEdit(doctor.id)">
-                    <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-                </ion-button>
-                <ion-button fill="clear" color="danger" (click)="confirmDelete(doctor)">
-                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-                </ion-button>
-            </div>
-        </div>
-    </div>
+  <ion-infinite-scroll (ionInfinite)="loadDoctors($event)" *ngIf="filteredDoctors.length > 0">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more doctors..."
+    ></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button (click)="navigateToCreate()">
-            <ion-icon name="add-outline"></ion-icon>
-        </ion-fab-button>
-    </ion-fab>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="navigateToCreate()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
--->

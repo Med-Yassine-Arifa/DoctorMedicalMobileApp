@@ -2,13 +2,15 @@ from bson import ObjectId
 from flask import Blueprint, request, jsonify
 from firebase_admin import auth
 from models.User import find_user_by_email, create_user, update_user, find_user_by_id, update_user_email, db
-from services.auth_service import hash_password, check_password, generate_otp, validate_otp, create_user_account, create_doctor_account
+from services.auth_service import hash_password, check_password, generate_otp, validate_otp, create_user_account, \
+    create_doctor_account
 from utils.mail import send_otp_email
 from middleware.auth_middleware import firebase_auth_required
 from middleware.role_middleware import role_required
 from datetime import datetime, UTC
 
 auth_bp = Blueprint('auth', __name__)
+
 
 # Register (Only for Patients)
 @auth_bp.route('/register', methods=['POST'])
@@ -33,26 +35,20 @@ def register():
         return jsonify({'error': 'Email already exists in MongoDB'}), 409
 
     try:
-        # Check if the email already exists in Firebase
-        try:
-            firebase_user = auth.get_user_by_email(email)
-            return jsonify({'error': 'Email already exists in Firebase'}), 409
-        except auth.UserNotFoundError:
-            # Email does not exist in Firebase, proceed with creation
-            pass
-
         # Create user in Firebase
         firebase_user = auth.create_user(
             email=email,
-            password=password,
-            display_name=role
+            password=password
         )
+
+        # Set custom claim for role
+        auth.set_custom_user_claims(firebase_user.uid, {'role': role})
 
         try:
             # Create user in MongoDB with Firebase UID
-            user_data = create_user_account(email, password, role, profile_data, firebase_uid=firebase_user.uid)
+            user_data = create_user_account(email, None, role, profile_data, firebase_uid=firebase_user.uid)
         except Exception as e:
-            # If MongoDB creation fails, delete the Firebase user to avoid orphaned users
+            # If MongoDB creation fails, delete the Firebase user
             auth.delete_user(firebase_user.uid)
             return jsonify({'error': f'Failed to create user in MongoDB: {str(e)}'}), 500
 
@@ -62,96 +58,56 @@ def register():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Login (Email/Password)
-@auth_bp.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
 
-    print(f"Login attempt for email: {email}")
-
-    user = find_user_by_email(email)
+# Get User Info
+@auth_bp.route('/me', methods=['GET'])
+@firebase_auth_required
+def get_user_info():
+    uid = request.user['sub']
+    role = request.user.get('role')
+    if not role:
+        return jsonify({'error': 'Role not found in token'}), 403
+    user = find_user_by_id(uid)
     if not user:
-        print(f"User not found in MongoDB: {email}")
-        return jsonify({'error': 'Invalid credentials'}), 401
+        return jsonify({'error': 'User not found'}), 404
+    return jsonify({
+        'userId': uid,
+        'email': user['email'],
+        'role': role,
+        'profile': user['profile']
+    }), 200
 
-    print(f"User found in MongoDB: {user['email']}, role: {user['role']}")
-
-    if not check_password(password, user['password']):
-        print(f"Password verification failed for user: {email}")
-        return jsonify({'error': 'Invalid credentials'}), 401
-
-    print(f"Password verification successful for user: {email}")
-
-    try:
-        firebase_user = auth.get_user_by_email(email)
-        print(f"Firebase user found: {firebase_user.uid}")
-        # Generate a custom token for the frontend to use
-        custom_token = auth.create_custom_token(firebase_user.uid)
-        return jsonify({
-            'message': 'Login successful',
-            'role': user['role'],
-            'userId': firebase_user.uid,
-            'token': custom_token.decode('utf-8')
-        }), 200
-    except auth.UserNotFoundError:
-        print(f"User not found in Firebase: {email}")
-        return jsonify({'error': 'User not found in Firebase'}), 404
-    except Exception as e:
-        print(f"Error during login: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 # Google Sign-In
 @auth_bp.route('/google-login', methods=['POST'])
 def google_login():
     data = request.get_json()
     id_token = data.get('idToken')
-    print(f"Received ID token for Google Sign-In: {id_token}")  # Log the received token
-
     try:
         # Verify the Firebase ID token
         decoded_token = auth.verify_id_token(id_token)
-        print(f"Decoded token: {decoded_token}")  # Log the decoded token for debugging
         email = decoded_token['email']
-        google_id = decoded_token['sub']  # Use 'sub' instead of 'uid'
+        google_id = decoded_token['sub']
 
         user = find_user_by_email(email)
         if not user:
-            role = decoded_token.get('display_name', 'patient')
-            if role not in ['patient', 'doctor', 'admin']:
-                role = 'patient'  # Default to patient if role is invalid
-            if role == 'patient':
-                user_data = create_user_account(email, None, role, {}, google_id=google_id,
-                                                firebase_uid=decoded_token['sub'])
-                print(f"Created new user in MongoDB: {email}")
-            else:
-                print(f"Role {role} not allowed for Google Sign-In")
-                return jsonify({'error': 'Only patients can be registered via Google Sign-In'}), 403
+            role = 'patient'  # Only patients via Google
+            user_data = create_user_account(email, None, role, {}, google_id=google_id, firebase_uid=google_id)
+            auth.set_custom_user_claims(google_id, {'role': role})
         else:
             user_data = user
-            print(f"User already exists in MongoDB: {email}")
 
-        # Ensure the user exists in Firebase
+        # Ensure Firebase user exists
         try:
             firebase_user = auth.get_user_by_email(email)
-            print(f"Firebase user found: {firebase_user.uid}")
         except auth.UserNotFoundError:
-            print(f"Firebase user not found, creating: {email}")
-            firebase_user = auth.create_user(
-                email=email,
-                display_name=user_data['role']
-            )
-            # Update MongoDB with Firebase UID
+            firebase_user = auth.create_user(email=email)
             db.users.update_one({'email': email}, {'$set': {'firebaseUid': firebase_user.uid}})
-            print(f"Updated MongoDB with firebaseUid: {firebase_user.uid}")
 
         return jsonify({'message': 'Login successful', 'role': user_data['role'], 'userId': firebase_user.uid}), 200
-    except auth.InvalidIdTokenError as e:
-        print(f"Invalid ID token error: {str(e)}")  # Log the specific error
+    except auth.InvalidIdTokenError:
         return jsonify({'error': 'Invalid Google token'}), 401
     except Exception as e:
-        print(f"Unexpected error during Google Sign-In: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # Forgot Password
@@ -191,8 +147,7 @@ def reset_password():
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    hashed_password = hash_password(new_password)
-    update_user_email(email, {'password': hashed_password, 'otp': None, 'otp_expiry': None})
+    update_user_email(email, {'otp': None, 'otp_expiry': None})
 
     try:
         firebase_user = auth.get_user_by_email(email)

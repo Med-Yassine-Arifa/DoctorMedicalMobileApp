@@ -1,206 +1,205 @@
 <ion-header>
-    <ion-toolbar>
-        <ion-buttons slot="start">
-            <ion-button (click)="goBack()">
-                <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
-            </ion-button>
-        </ion-buttons>
-        <ion-title>{{ pageTitle }}</ion-title>
-        <ion-buttons slot="end">
-            <ion-button (click)="onSubmit()">
-                <ion-icon slot="icon-only" name="save-outline"></ion-icon>
-            </ion-button>
-        </ion-buttons>
-    </ion-toolbar>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode ? 'Edit Doctor' : 'Create Doctor' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="submitForm()" [disabled]="!doctorForm.valid">
+        <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-    <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
-        <div class="form-section">
-            <h2>Account Information</h2>
+  <form [formGroup]="doctorForm" (ngSubmit)="submitForm()">
+    <div class="form-section">
+      <h2>Account Information</h2>
 
-            <div class="input-field" [class.has-error]="doctorForm.get('email')?.invalid && doctorForm.get('email')?.touched">
-                <div class="icon-container">
-                    <ion-icon name="mail-outline"></ion-icon>
-                </div>
-                <input
-                        type="email"
-                        formControlName="email"
-                        placeholder="Email"
-                        class="text-input"
-                        [readonly]="isEditMode"
-                >
-            </div>
-            <div class="error-message" *ngIf="doctorForm.get('email')?.invalid && doctorForm.get('email')?.touched">
-                <ion-icon name="alert-circle-outline"></ion-icon>
-                <span>Please enter a valid email address</span>
-            </div>
-
-            <div class="input-field" *ngIf="!isEditMode" [class.has-error]="doctorForm.get('password')?.invalid && doctorForm.get('password')?.touched">
-                <div class="icon-container">
-                    <ion-icon name="lock-outline"></ion-icon>
-                </div>
-                <input
-                        type="password"
-                        formControlName="password"
-                        placeholder="Password"
-                        class="text-input"
-                >
-            </div>
-            <div class="error-message" *ngIf="!isEditMode && doctorForm.get('password')?.invalid && doctorForm.get('password')?.touched">
-                <ion-icon name="alert-circle-outline"></ion-icon>
-                <span>Password must be at least 6 characters</span>
-            </div>
-
-            <div class="input-field" *ngIf="isEditMode" [class.has-error]="doctorForm.get('password')?.invalid && doctorForm.get('password')?.touched">
-                <div class="icon-container">
-                    <ion-icon name="lock-outline"></ion-icon>
-                </div>
-                <input
-                        type="password"
-                        formControlName="password"
-                        placeholder="New Password (leave empty to keep current)"
-                        class="text-input"
-                >
-            </div>
-            <div class="error-message" *ngIf="isEditMode && doctorForm.get('password')?.invalid && doctorForm.get('password')?.touched">
-                <ion-icon name="alert-circle-outline"></ion-icon>
-                <span>Password must be at least 6 characters</span>
-            </div>
+      <div class="input-field" [class.has-error]="doctorForm.get('email')?.invalid && doctorForm.get('email')?.touched">
+        <div class="icon-container">
+          <ion-icon name="mail-outline"></ion-icon>
         </div>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+          class="text-input"
+          [readonly]="isEditMode"
+        >
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('email')?.invalid && doctorForm.get('email')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Please enter a valid email address</span>
+      </div>
 
-        <div class="form-section" formGroupName="profile">
-            <h2>Personal Information</h2>
-
-            <div class="input-field" [class.has-error]="doctorForm.get('profile.firstName')?.invalid && doctorForm.get('profile.firstName')?.touched">
-                <div class="icon-container">
-                    <ion-icon name="person-outline"></ion-icon>
-                </div>
-                <input
-                        type="text"
-                        formControlName="firstName"
-                        placeholder="First Name"
-                        class="text-input"
-                >
-            </div>
-            <div class="error-message" *ngIf="doctorForm.get('profile.firstName')?.invalid && doctorForm.get('profile.firstName')?.touched">
-                <ion-icon name="alert-circle-outline"></ion-icon>
-                <span>First name is required</span>
-            </div>
-
-            <div class="input-field" [class.has-error]="doctorForm.get('profile.lastName')?.invalid && doctorForm.get('profile.lastName')?.touched">
-                <div class="icon-container">
-                    <ion-icon name="person-outline"></ion-icon>
-                </div>
-                <input
-                        type="text"
-                        formControlName="lastName"
-                        placeholder="Last Name"
-                        class="text-input"
-                >
-            </div>
-            <div class="error-message" *ngIf="doctorForm.get('profile.lastName')?.invalid && doctorForm.get('profile.lastName')?.touched">
-                <ion-icon name="alert-circle-outline"></ion-icon>
-                <span>Last name is required</span>
-            </div>
-
-            <div class="input-field">
-                <div class="icon-container">
-                    <ion-icon name="call-outline"></ion-icon>
-                </div>
-                <input
-                        type="tel"
-                        formControlName="phone"
-                        placeholder="Phone Number"
-                        class="text-input"
-                >
-            </div>
-
-            <div class="input-field">
-                <div class="icon-container">
-                    <ion-icon name="location-outline"></ion-icon>
-                </div>
-                <input
-                        type="text"
-                        formControlName="address"
-                        placeholder="Address"
-                        class="text-input"
-                >
-            </div>
-
-            <div class="input-field">
-                <div class="icon-container">
-                    <ion-icon name="medkit-outline"></ion-icon>
-                </div>
-                <input
-                        type="text"
-                        formControlName="specialization"
-                        placeholder="Specialization"
-                        class="text-input"
-                >
-            </div>
-
-            <div class="input-field">
-                <div class="icon-container">
-                    <ion-icon name="card-outline"></ion-icon>
-                </div>
-                <input
-                        type="text"
-                        formControlName="licenseNumber"
-                        placeholder="License Number"
-                        class="text-input"
-                >
-            </div>
+      <div class="input-field" *ngIf="!isEditMode" [class.has-error]="doctorForm.get('password')?.invalid && doctorForm.get('password')?.touched">
+        <div class="icon-container">
+          <ion-icon name="lock-closed-outline"></ion-icon>
         </div>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message" *ngIf="!isEditMode && doctorForm.get('password')?.invalid && doctorForm.get('password')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Password must be at least 6 characters</span>
+      </div>
+    </div>
 
-        <div class="form-section">
-            <div class="section-header">
-                <h2>Availability</h2>
-                <ion-button fill="clear" color="primary" (click)="addAvailabilitySlot()">
-                    <ion-icon slot="icon-only" name="add-outline"></ion-icon>
-                </ion-button>
-            </div>
+    <div class="form-section" formGroupName="profile">
+      <h2>Personal Information</h2>
 
-            <div class="empty-availability" *ngIf="availabilityArray.length === 0">
-                <p>No availability slots added. Click the + button to add availability.</p>
-            </div>
-
-            <div class="availability-slots" formArrayName="availability">
-                <div class="availability-slot" *ngFor="let slot of availabilityArray.controls; let i = index" [formGroupName]="i">
-                    <div class="slot-fields">
-                        <div class="slot-field">
-                            <div class="icon-container">
-                                <ion-icon name="calendar-outline"></ion-icon>
-                            </div>
-                            <select formControlName="day" class="select-input">
-                                <option *ngFor="let day of weekdays" [value]="day">{{ day }}</option>
-                            </select>
-                        </div>
-
-                        <div class="slot-field">
-                            <div class="icon-container">
-                                <ion-icon name="time-outline"></ion-icon>
-                            </div>
-                            <input type="time" formControlName="startTime" class="time-input">
-                        </div>
-
-                        <div class="slot-field">
-                            <div class="icon-container">
-                                <ion-icon name="time-outline"></ion-icon>
-                            </div>
-                            <input type="time" formControlName="endTime" class="time-input">
-                        </div>
-                    </div>
-
-                    <ion-button fill="clear" color="danger" (click)="removeAvailabilitySlot(i)">
-                        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-                    </ion-button>
-                </div>
-            </div>
+      <div class="input-field" [class.has-error]="doctorForm.get('profile.firstName')?.invalid && doctorForm.get('profile.firstName')?.touched">
+        <div class="icon-container">
+          <ion-icon name="person-outline"></ion-icon>
         </div>
+        <input
+          type="text"
+          formControlName="firstName"
+          placeholder="First Name"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('profile.firstName')?.invalid && doctorForm.get('profile.firstName')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>First name is required</span>
+      </div>
 
-        <ion-button expand="block" type="submit" class="submit-button">
-            {{ isEditMode ? 'Update Doctor' : 'Create Doctor' }}
+      <div class="input-field" [class.has-error]="doctorForm.get('profile.lastName')?.invalid && doctorForm.get('profile.lastName')?.touched">
+        <div class="icon-container">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <input
+          type="text"
+          formControlName="lastName"
+          placeholder="Last Name"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('profile.lastName')?.invalid && doctorForm.get('profile.lastName')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Last name is required</span>
+      </div>
+
+      <div class="input-field" [class.has-error]="doctorForm.get('profile.phone')?.invalid && doctorForm.get('profile.phone')?.touched">
+        <div class="icon-container">
+          <ion-icon name="call-outline"></ion-icon>
+        </div>
+        <input
+          type="tel"
+          formControlName="phone"
+          placeholder="Phone Number (8 digits)"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('profile.phone')?.invalid && doctorForm.get('profile.phone')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Phone number must be exactly 8 digits</span>
+      </div>
+
+      <div class="input-field" [class.has-error]="doctorForm.get('profile.address')?.invalid && doctorForm.get('profile.address')?.touched">
+        <div class="icon-container">
+          <ion-icon name="location-outline"></ion-icon>
+        </div>
+        <input
+          type="text"
+          formControlName="address"
+          placeholder="Address"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('profile.address')?.invalid && doctorForm.get('profile.address')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Address is required</span>
+      </div>
+
+      <div class="input-field" [class.has-error]="doctorForm.get('profile.specialization')?.invalid && doctorForm.get('profile.specialization')?.touched">
+        <div class="icon-container">
+          <ion-icon name="medkit-outline"></ion-icon>
+        </div>
+        <select formControlName="specialization" class="select-input">
+          <option value="" disabled>Select Specialization</option>
+          <option *ngFor="let spec of specializations" [value]="spec">{{ spec }}</option>
+        </select>
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('profile.specialization')?.invalid && doctorForm.get('profile.specialization')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Specialization is required</span>
+      </div>
+
+      <div class="input-field" [class.has-error]="doctorForm.get('profile.licenseNumber')?.invalid && doctorForm.get('profile.licenseNumber')?.touched">
+        <div class="icon-container">
+          <ion-icon name="card-purpose">
+          </ion-icon>
+        </div>
+        <input
+          type="text"
+          formControlName="licenseNumber"
+          placeholder="License Number (15 digits)"
+          class="text-input"
+        >
+      </div>
+      <div class="error-message" *ngIf="doctorForm.get('profile.licenseNumber')?.invalid && doctorForm.get('profile.licenseNumber')?.touched">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>License number must be exactly 15 digits</span>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Availability</h2>
+        <ion-button fill="clear" color="primary" (click)="addAvailabilitySlot()">
+          <ion-icon slot="icon-only" name="add-outline"></ion-icon>
         </ion-button>
-    </form>
+      </div>
+
+      <div class="empty-availability" *ngIf="doctor.availability.length === 0">
+        <p>No availability slots added. Click the + button to add availability.</p>
+      </div>
+
+      <div class="availability-slots" formArrayName="availability">
+        <div class="availability-slot" *ngFor="let slot of availabilityArray.controls; let i = index" [formGroupName]="i">
+          <div class="slot-fields">
+            <div class="slot-field">
+              <div class="icon-container">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <select formControlName="day" class="select-input">
+                <option *ngFor="let day of weekdays" [value]="day">{{ day }}</option>
+              </select>
+            </div>
+
+            <div class="slot-field">
+              <div class="icon-container">
+                <ion-icon name="time-outline"></ion-icon>
+              </div>
+              <input type="time" formControlName="startTime" class="time-input">
+            </div>
+
+            <div class="slot-field">
+              <div class="icon-container">
+                <ion-icon name="time-outline"></ion-icon>
+              </div>
+              <input type="time" formControlName="endTime" class="time-input">
+            </div>
+          </div>
+
+          <ion-button fill="clear" color="danger" (click)="removeAvailabilitySlot(i)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <ion-button expand="block" type="submit" class="submit-button" [disabled]="!doctorForm.valid">
+      {{ isEditMode ? 'Update Doctor' : 'Create Doctor' }}
+    </ion-button>
+  </form>
 </ion-content>
