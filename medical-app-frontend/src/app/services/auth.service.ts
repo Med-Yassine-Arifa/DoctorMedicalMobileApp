@@ -28,7 +28,7 @@ export class AuthService {
   private tokenFetchTrigger = new Subject<void>();
 
   constructor(
-    private router: Router,
+    private router : Router,
     private storageUtil: StorageUtil,
     private http: HttpClient
   ) {

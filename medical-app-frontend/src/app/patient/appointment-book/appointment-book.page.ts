@@ -8,7 +8,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
   templateUrl: './appointment-book.page.html',
   styleUrls: ['./appointment-book.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule]
 })
 export class AppointmentBookPage implements OnInit {
 

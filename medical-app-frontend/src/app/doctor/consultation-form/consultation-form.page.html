@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isEditMode ? 'Edit Consultation' : 'New Consultation' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="consultationForm" (ngSubmit)="submit()">
+    <ion-item>
+      <ion-label position="floating">Appointment ID</ion-label>
+      <ion-input formControlName="appointmentId" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Patient ID</ion-label>
+      <ion-input formControlName="patientId" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Diagnosis</ion-label>
+      <ion-textarea formControlName="diagnosis" rows="3"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Prescription</ion-label>
+      <ion-textarea formControlName="prescription" rows="3"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Notes</ion-label>
+      <ion-textarea formControlName="notes" rows="3"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Attach Files</ion-label>
+      <input type="file" multiple (change)="onFileChange($event)" accept=".pdf,.doc,.docx,.jpg,.png" />
+    </ion-item>
+
+    <ion-button expand="block" type="submit" [disabled]="consultationForm.invalid">
+      {{ isEditMode ? 'Update' : 'Create' }}
+    </ion-button>
+    <ion-button expand="block" color="light" (click)="cancel()">Cancel</ion-button>
+  </form>
+</ion-content>

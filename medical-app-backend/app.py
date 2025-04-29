@@ -4,7 +4,7 @@ from venv import logger
 from flask import Flask
 from flask_mail import Mail
 from flask_cors import CORS
-
+from api.consultation import consultation_bp
 from api import auth, admin
 from api.admin import admin_bp
 from api.patient import patient_bp
@@ -15,6 +15,8 @@ from firebase_admin import credentials
 
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:8100"}})
 
 # Load configurations
 app.config.from_object(Config)
@@ -31,9 +33,11 @@ CORS(app, resources={r"/api/*": {
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 app.register_blueprint(patient_bp, url_prefix='/api/patient')
+app.register_blueprint(consultation_bp, url_prefix='/api/consultation')
+
 
 cred = credentials.Certificate('key/firebase-service-account.json')
 firebase_admin.initialize_app(cred)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+     app.run(host='0.0.0.0', port=5000, debug=True)

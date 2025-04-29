@@ -37,16 +37,12 @@ export const routes: Routes = [
     loadComponent: () => import('./patient/notifications/notifications.page').then( m => m.NotificationsPage)
   },
   {
-    path: 'consultation',
+    path: 'patient/consultation',
     loadComponent: () => import('./patient/consultation/consultation.page').then( m => m.ConsultationPage)
   },
   {
     path: 'appointments',
     loadComponent: () => import('./doctor/appointments/appointments.page').then( m => m.AppointmentsPage)
-  },
-  {
-    path: 'consultation',
-    loadComponent: () => import('./doctor/consultation/consultation.page').then( m => m.ConsultationPage)
   },
   {
     path: 'documents',
@@ -88,6 +84,34 @@ export const routes: Routes = [
     path: 'admin/doctors',
     loadComponent: () => import('./admin/doctors/doctors-list/doctors-list.page').then( m => m.DoctorsListPage)
   },
+  {
+    path: 'doctor/consultation-list',
+    loadComponent: () => import('./doctor/consultation-list/consultation-list.page').then(m => m.ConsultationListPage)
+  },
+
+  {
+    path: 'doctor/consultation-list',
+    loadComponent: () => import('./doctor/consultation-list/consultation-list.page').then(m => m.ConsultationListPage)
+  },
+  {
+    path: 'doctor/consultation-form',
+    children: [
+      {
+        path: 'new',
+        loadComponent: () => import('./doctor/consultation-form/consultation-form.page').then(m => m.ConsultationFormPage)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./doctor/consultation-form/consultation-form.page').then(m => m.ConsultationFormPage)
+      },
+      {
+        path: '',
+        redirectTo: 'new',
+        pathMatch: 'full'
+      }
+    ]
+  }
+
 
 
 ];
