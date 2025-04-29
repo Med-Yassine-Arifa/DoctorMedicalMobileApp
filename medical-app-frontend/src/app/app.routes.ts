@@ -21,11 +21,6 @@ export const routes: Routes = [
     loadComponent: () => import('./patient/patient-dashboard/patient-dashboard.page').then( m => m.PatientDashboardPage)
   },
   {
-    path: 'patient/doctors',
-    loadComponent: () => import('./patient/doctors/doctors.page').then( m => m.DoctorsPage)
-  },
-
-  {
     path: 'patient/appointment-book',
     loadComponent: () => import('./patient/appointment-book/appointment-book.page').then( m => m.AppointmentBookPage)
   },
@@ -93,5 +88,6 @@ export const routes: Routes = [
     path: 'admin/doctors',
     loadComponent: () => import('./admin/doctors/doctors-list/doctors-list.page').then( m => m.DoctorsListPage)
   },
+
 
 ];

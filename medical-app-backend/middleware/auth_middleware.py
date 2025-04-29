@@ -10,11 +10,10 @@ def firebase_auth_required(f):
         print(f"Authorization Header: {auth_header}")  # Debug
         if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({'error': 'Authorization header missing or invalid'}), 401
-
         token = auth_header.split('Bearer ')[1]
         try:
             decoded_token = auth.verify_id_token(token)
-            print(f"Decoded Token: {decoded_token}")  # Debug
+            print(f"Decoded Token: {decoded_token}")
             request.user = decoded_token
             return f(*args, **kwargs)
         except auth.ExpiredIdTokenError:

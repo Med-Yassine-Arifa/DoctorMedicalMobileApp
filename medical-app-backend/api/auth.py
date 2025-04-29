@@ -44,6 +44,7 @@ def register():
         # Set custom claim for role
         auth.set_custom_user_claims(firebase_user.uid, {'role': role})
 
+
         try:
             # Create user in MongoDB with Firebase UID
             user_data = create_user_account(email, None, role, profile_data, firebase_uid=firebase_user.uid)

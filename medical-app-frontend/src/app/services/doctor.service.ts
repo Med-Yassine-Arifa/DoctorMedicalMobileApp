@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject, from, throwError } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { map, switchMap, catchError, retryWhen, delay, take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AvailabilitySlot, DoctorUser } from '../models/user.model';
 import { getAuth } from 'firebase/auth';
@@ -47,26 +47,48 @@ export class DoctorService {
   constructor(private http: HttpClient) {}
 
   private getAuthHeaders(): Observable<HttpHeaders> {
-    return from(getAuth().currentUser?.getIdToken() || Promise.resolve('')).pipe(
+    const auth = getAuth();
+    if (!auth) {
+      console.error('Firebase auth not initialized');
+      return throwError(() => new Error('Firebase auth not initialized'));
+    }
+    const user = auth.currentUser;
+    if (!user) {
+      console.warn('No user logged in. Cannot retrieve Firebase token.');
+      return throwError(() => new Error('No authenticated user found'));
+    }
+    console.log('Fetching token for user:', user.uid);
+    return from(user.getIdToken(true)).pipe(
       map(token => {
         if (token) {
           console.log('Firebase Token:', token);
+          try {
+            const decoded = JSON.parse(atob(token.split('.')[1]));
+            console.log('Token Timestamps:', {
+              iat: new Date(decoded.iat * 1000).toISOString(),
+              exp: new Date(decoded.exp * 1000).toISOString(),
+              clientTime: new Date().toISOString()
+            });
+          } catch (e) {
+            console.error('Error decoding token:', e);
+          }
           return new HttpHeaders({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           });
         }
-        console.warn('No user logged in or token unavailable');
+        console.error('Failed to retrieve Firebase token');
         return new HttpHeaders({ 'Content-Type': 'application/json' });
       }),
       catchError(error => {
         console.error('Error retrieving Firebase token:', error);
-        return throwError(() => new Error('Failed to retrieve authentication token'));
+        return throwError(() => new Error('Failed to retrieve authentication token: ' + error.message));
       })
     );
   }
 
   notifyDoctorListUpdate() {
+    console.log('Notifying doctor list update');
     this.doctorListUpdated.next();
   }
 
@@ -87,6 +109,16 @@ export class DoctorService {
           `${environment.apiUrl}/admin/create-doctor`,
           doctorData,
           { headers }
+        )
+      ),
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(2),
+          catchError(error => {
+            console.error('Error in createDoctor after retries:', error);
+            return throwError(() => error);
+          })
         )
       ),
       catchError(error => {
@@ -120,6 +152,16 @@ export class DoctorService {
           )
         )
       ),
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(2),
+          catchError(error => {
+            console.error('Error in getAllDoctors after retries:', error);
+            return throwError(() => error);
+          })
+        )
+      ),
       catchError(error => {
         console.error('Error in getAllDoctors:', error);
         return throwError(() => error);
@@ -149,6 +191,16 @@ export class DoctorService {
           } as DoctorUser))
         )
       ),
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(2),
+          catchError(error => {
+            console.error('Error in getDoctor after retries:', error);
+            return throwError(() => error);
+          })
+        )
+      ),
       catchError(error => {
         console.error('Error in getDoctor:', error);
         return throwError(() => error);
@@ -175,6 +227,16 @@ export class DoctorService {
           { headers }
         )
       ),
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(2),
+          catchError(error => {
+            console.error('Error in updateDoctor after retries:', error);
+            return throwError(() => error);
+          })
+        )
+      ),
       catchError(error => {
         console.error('Error in updateDoctor:', error);
         return throwError(() => error);
@@ -186,6 +248,16 @@ export class DoctorService {
     return this.getAuthHeaders().pipe(
       switchMap(headers =>
         this.http.delete<DeleteDoctorResponse>(`${environment.apiUrl}/admin/doctors/${doctorId}`, { headers })
+      ),
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(2),
+          catchError(error => {
+            console.error('Error in deleteDoctor after retries:', error);
+            return throwError(() => error);
+          })
+        )
       ),
       catchError(error => {
         console.error('Error in deleteDoctor:', error);

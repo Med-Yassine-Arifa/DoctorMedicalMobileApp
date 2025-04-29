@@ -7,6 +7,7 @@ from flask_cors import CORS
 
 from api import auth, admin
 from api.admin import admin_bp
+from api.patient import patient_bp
 from config import Config
 from api.auth import auth_bp
 import firebase_admin
@@ -29,8 +30,7 @@ CORS(app, resources={r"/api/*": {
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
-
-
+app.register_blueprint(patient_bp, url_prefix='/api/patient')
 
 cred = credentials.Certificate('key/firebase-service-account.json')
 firebase_admin.initialize_app(cred)

@@ -6,7 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { DoctorService } from '../../services/doctor.service';
 import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { getAuth } from 'firebase/auth';
+import { getAuth  } from 'firebase/auth';
+
 import {
   peopleOutline,
   personAddOutline,

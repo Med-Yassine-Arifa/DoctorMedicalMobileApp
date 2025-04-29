@@ -4,7 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Va
 import { IonicModule, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DoctorService} from "../../../services/doctor.service";
-import { AvailabilitySlot , DoctorUser} from "../../../models/user.model";
+import {AvailabilitySlot , DoctorUser} from "../../../models/user.model";
+import { getAuth } from 'firebase/auth';
 import { addIcons } from 'ionicons';
 import {
   checkmarkOutline,
@@ -120,9 +121,9 @@ export class DoctorFormPage implements OnInit {
             this.availabilityArray.push(this.createAvailabilitySlot(slot));
           });
         },
-        error: (error:any) => {
+        error: async (error) => {
           console.error('Error loading doctor:', error);
-          this.presentToast('Failed to load doctor', 'danger');
+          await this.presentToast('Failed to load doctor', 'danger');
         }
       });
     }
@@ -144,7 +145,14 @@ export class DoctorFormPage implements OnInit {
     this.availabilityArray.removeAt(index);
   }
 
-  submitForm() {
+  async submitForm() {
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      await this.presentToast('Please log in to perform this action.', 'danger');
+      this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+      return;
+    }
+
     if (this.doctorForm.invalid) {
       this.doctorForm.markAllAsTouched();
       return;
@@ -162,30 +170,63 @@ export class DoctorFormPage implements OnInit {
       availability: this.doctorForm.value.availability
     };
 
-    if (this.isEditMode && this.doctorId) {
-      this.doctorService.updateDoctor(this.doctorId, doctorData).subscribe({
-        next: () => {
-          this.presentToast('Doctor updated successfully', 'success');
-          this.doctorService.notifyDoctorListUpdate();
-          this.router.navigateByUrl('/admin/doctors');
-        },
-        error: (error:any) => {
-          console.error('Error updating doctor:', error);
-          this.presentToast('Failed to update doctor', 'danger');
-        }
-      });
-    } else {
-      this.doctorService.createDoctor(doctorData).subscribe({
-        next: () => {
-          this.presentToast('Doctor created successfully', 'success');
-          this.doctorService.notifyDoctorListUpdate();
-          this.router.navigateByUrl('/admin/doctors');
-        },
-        error: (error:any) => {
-          console.error('Error creating doctor:', error);
-          this.presentToast('Failed to create doctor', 'danger');
-        }
-      });
+    try {
+      if (this.isEditMode && this.doctorId) {
+        this.doctorService.updateDoctor(this.doctorId, doctorData).subscribe({
+          next: () => {
+            this.presentToast('Doctor updated successfully', 'success');
+            //this.doctorService.notifyDoctorListUpdate();
+            this.router.navigateByUrl('/admin/doctors');
+          },
+          error: async (error) => {
+            console.error('Error updating doctor:', error);
+            if (error.status === 401) {
+              await this.presentToast('Unauthorized access. Please log in again.', 'danger');
+              this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+            } else {
+              await this.presentToast('Failed to update doctor', 'danger');
+            }
+          }
+        });
+      } else {
+        this.doctorService.createDoctor(doctorData).subscribe({
+          next: () => {
+            this.presentToast('Doctor created successfully', 'success');
+            //this.doctorService.notifyDoctorListUpdate();
+            this.router.navigateByUrl('/admin/doctors');
+          },
+          error: async (error) => {
+            console.error('Error creating doctor:', error);
+            if (error.status === 401) {
+              // Attempt to refresh token and retry once
+              try {
+                await auth.currentUser?.getIdToken(true);
+                this.doctorService.createDoctor(doctorData).subscribe({
+                  next: () => {
+                    this.presentToast('Doctor created successfully', 'success');
+                    this.doctorService.notifyDoctorListUpdate();
+                    this.router.navigateByUrl('/admin/doctors');
+                  },
+                  error: async (err) => {
+                    console.error('Retry failed:', err);
+                    await this.presentToast('Unauthorized access. Please log in again.', 'danger');
+                    this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+                  }
+                });
+              } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                await this.presentToast('Unauthorized access. Please log in again.', 'danger');
+                this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+              }
+            } else {
+              await this.presentToast('Failed to create doctor', 'danger');
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error initiating doctor operation:', error);
+      await this.presentToast('Failed to perform operation', 'danger');
     }
   }
 
