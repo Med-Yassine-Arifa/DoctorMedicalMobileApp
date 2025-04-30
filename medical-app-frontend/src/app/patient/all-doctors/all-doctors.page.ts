@@ -50,7 +50,7 @@ export class AllDoctorsPage implements OnInit {
     this.patientService.getAllDoctors().subscribe({
       next: (doctors) => {
         console.log('All doctors received:', doctors);
-        this.doctors = doctors.map(doctor => ({
+       this.doctors = doctors.map(doctor => ({
           ...doctor,
           image: `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 100)}.jpg`,
           distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km away`

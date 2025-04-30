@@ -25,6 +25,10 @@ export const routes: Routes = [
     loadComponent: () => import('./patient/all-doctors/all-doctors.page').then( m => m.AllDoctorsPage)
   },
   {
+    path: 'patient/doctor-details',
+    loadComponent: () => import('./patient/doctor-details/doctor-details.page').then( m => m.DoctorDetailsPage)
+  },
+  {
     path: 'patient/appointment-book',
     loadComponent: () => import('./patient/appointment-book/appointment-book.page').then( m => m.AppointmentBookPage)
   },
@@ -92,10 +96,7 @@ export const routes: Routes = [
     path: 'admin/doctors',
     loadComponent: () => import('./admin/doctors/doctors-list/doctors-list.page').then( m => m.DoctorsListPage)
   },
-  {
-    path: 'patient/doctor-details',
-    loadComponent: () => import('./patient/doctor-details/doctor-details.page').then( m => m.DoctorDetailsPage)
-  },
+
 
 
 

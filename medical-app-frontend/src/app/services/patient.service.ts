@@ -55,8 +55,23 @@ export class PatientService {
     );
   }
 
+  getPopularDoctors(specialization?: string): Observable<DoctorUser[]> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => {
+        const url = specialization
+          ? `${this.apiUrl}/doctors/popular?specialization=${encodeURIComponent(specialization)}`
+          : `${this.apiUrl}/doctors/popular`;
+        return this.http.get<DoctorUser[]>(url, { headers }).pipe(
+          catchError(error => {
+            console.error('Error fetching popular doctors:', error);
+            return throwError(() => new Error('Failed to fetch popular doctors'));
+          })
+        );
+      })
+    );
+  }
 
-  getAllDoctors(specialization?: string): Observable<DoctorUser[]> {
+  getAllDoctors(specialization?: string):Observable<DoctorUser[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => {
         const url = specialization
@@ -64,8 +79,8 @@ export class PatientService {
           : `${this.apiUrl}/doctors`;
         return this.http.get<DoctorUser[]>(url, { headers }).pipe(
           catchError(error => {
-            console.error('Error fetching all doctors:', error);
-            return throwError(() => new Error('Failed to fetch all doctors'));
+            console.error('Error fetching popular doctors:', error);
+            return throwError(() => new Error('Failed to fetch popular doctors'));
           })
         );
       })

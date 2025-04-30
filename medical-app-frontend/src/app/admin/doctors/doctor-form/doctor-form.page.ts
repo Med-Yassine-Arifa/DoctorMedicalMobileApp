@@ -175,7 +175,7 @@ export class DoctorFormPage implements OnInit {
         this.doctorService.updateDoctor(this.doctorId, doctorData).subscribe({
           next: () => {
             this.presentToast('Doctor updated successfully', 'success');
-            //this.doctorService.notifyDoctorListUpdate();
+            this.doctorService.notifyDoctorListUpdate();
             this.router.navigateByUrl('/admin/doctors');
           },
           error: async (error) => {
@@ -204,6 +204,7 @@ export class DoctorFormPage implements OnInit {
                 this.doctorService.createDoctor(doctorData).subscribe({
                   next: () => {
                     this.presentToast('Doctor created successfully', 'success');
+                    this.doctorService.notifyDoctorListUpdate();
                     this.doctorService.notifyDoctorListUpdate();
                     this.router.navigateByUrl('/admin/doctors');
                   },

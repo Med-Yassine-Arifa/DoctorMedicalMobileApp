@@ -1,8 +1,7 @@
 from flask import Blueprint, jsonify, request
 from middleware.auth_middleware import firebase_auth_required
 from middleware.role_middleware import role_required
-from models.User import get_popular_doctors, get_all_doctors_patient, search_doctors
-
+from models.User import get_popular_doctors,get_all_doctors_patient,search_doctors
 patient_bp = Blueprint('patient', __name__)
 
 @patient_bp.route('/doctors/popular', methods=['GET'])

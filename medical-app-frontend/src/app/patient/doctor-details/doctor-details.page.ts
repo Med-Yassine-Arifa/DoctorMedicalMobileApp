@@ -1,25 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import {
-  IonBackButton,
-  IonButton, IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonImg,
-  IonTitle,
-  IonToolbar
-} from '@ionic/angular/standalone';
-import {DoctorUser} from "../../models/user.model";
-import {ActivatedRoute} from "@angular/router";
+import { ActivatedRoute } from '@angular/router';
+import { DoctorUser } from '../../models/user.model';
+import {IonicModule} from "@ionic/angular";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-doctor-details',
   templateUrl: './doctor-details.page.html',
   styleUrls: ['./doctor-details.page.scss'],
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonImg, IonIcon, IonBackButton, IonButtons]
+  imports: [
+    IonicModule,
+    NgClass,
+    NgForOf,
+    NgIf
+  ],
+  standalone: true
 })
 export class DoctorDetailsPage implements OnInit {
   doctor: (DoctorUser & { image: string; distance: string; rating: number }) | null = null;
@@ -31,14 +26,14 @@ export class DoctorDetailsPage implements OnInit {
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
-    // Get doctor data from navigation parameters
+// Get doctor data from navigation parameters
     this.route.queryParams.subscribe(params => {
       if (params['doctor']) {
         this.doctor = JSON.parse(params['doctor']);
       }
     });
 
-
+// Generate dates starting from today (April 30, 2025)
     const today = new Date('2025-04-30');
     const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let i = 0; i < 5; i++) {
@@ -61,7 +56,7 @@ export class DoctorDetailsPage implements OnInit {
 
   sendMessage() {
     console.log(`Sending message to ${this.doctor?.profile.firstName} ${this.doctor?.profile.lastName}`);
-    // Placeholder for sending a message
+// Placeholder for sending a message
   }
 
   bookAppointment() {
@@ -70,6 +65,6 @@ export class DoctorDetailsPage implements OnInit {
       return;
     }
     console.log(`Booking appointment with ${this.doctor?.profile.firstName} ${this.doctor?.profile.lastName} on ${this.selectedDate} at ${this.selectedTime}`);
-    // Placeholder for booking an appointment
+// Placeholder for booking an appointment
   }
 }

@@ -97,7 +97,7 @@ export class PatientDashboardPage implements OnInit {
   loadDoctors(specialization?: string) {
     this.errorMessage = ''; // Reset error message
     this.isLoading = true;
-    this.patientService.getAllDoctors(specialization).subscribe({
+    this.patientService.getPopularDoctors(specialization).subscribe({
       next: (doctors) => {
         console.log('Doctors received from backend:', doctors);
         this.doctors = doctors;
@@ -204,7 +204,7 @@ export class PatientDashboardPage implements OnInit {
   }
 
   viewDoctorDetails(doctor: DoctorUser) {
-    this.router.navigate(['patient/doctor-details'], {
+    this.router.navigate(['/doctor-details'], {
       queryParams: { doctor: JSON.stringify(doctor) }
     });
   }

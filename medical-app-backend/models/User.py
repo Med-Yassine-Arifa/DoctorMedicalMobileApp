@@ -22,8 +22,8 @@ def find_user_by_email(email):
                 'address': ''
             }),
             'fcmToken': user.get('fcmToken', ''),
-            'createdAt': user['createdAt'].isoformat(),
-            'updatedAt': user['updatedAt'].isoformat(),
+            'createdAt': user.get('createdAt', datetime.now().isoformat()),
+            'updatedAt': user.get('updatedAt', datetime.now().isoformat()),
             'otp': user.get('otp'),
             'otp_expiry': user.get('otp_expiry').isoformat() if user.get('otp_expiry') else None
         }
@@ -142,7 +142,6 @@ def get_all_doctors_patient(specialization=None):
         query = {'role': 'doctor'}
         if specialization:
             query['profile.specialization'] = specialization
-        # Sort by firstName and lastName
         doctor_cursor = users_collection.find(query).sort([
             ('profile.firstName', 1),
             ('profile.lastName', 1)
@@ -153,7 +152,7 @@ def get_all_doctors_patient(specialization=None):
                 doctors.append(doctor_data)
         return doctors
     except Exception as e:
-        print(f"Error getting all doctors: {e}")
+        print(f"Error getting popular doctors: {e}")
         return []
 
 def get_popular_doctors(specialization=None):
