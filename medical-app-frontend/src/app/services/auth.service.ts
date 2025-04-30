@@ -166,6 +166,7 @@ export class AuthService {
                   } as PatientUser;
                 } else if (role === 'doctor') {
                   appUser = {
+
                     firebaseUid: user.uid,
                     email: email,
                     role: 'doctor',
@@ -390,15 +391,6 @@ export class AuthService {
     return user;
   }
 
-  isAdmin(): Observable<boolean> {
-    return this.user$.pipe(
-      map(user => {
-        const isAdmin = user?.role === 'admin';
-        console.log('Checking isAdmin:', isAdmin);
-        return isAdmin;
-      })
-    );
-  }
   async getAuthTokenWithRetry(user: any, attempts: number = 2): Promise<{ token: string; expiry: number | null }> {
     for (let i = 0; i < attempts; i++) {
       try {
@@ -472,4 +464,5 @@ export class AuthService {
       });
     });
   }
+
 }

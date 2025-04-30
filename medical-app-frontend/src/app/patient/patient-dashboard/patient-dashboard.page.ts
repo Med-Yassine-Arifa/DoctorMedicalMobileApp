@@ -1,262 +1,211 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { DoctorService} from "../../services/doctor.service";
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { addIcons } from 'ionicons';
-import {
-  addOutline,
-  createOutline,
-  trashOutline,
-  arrowBackOutline,
-  searchOutline,
-  closeCircleOutline,
-  refreshOutline
-} from 'ionicons/icons';
-import {DoctorUser} from "../../models/user.model";
-import {BehaviorSubject, Subscription} from "rxjs";
-import {debounceTime} from "rxjs/operators";
-import {InfiniteScrollCustomEvent} from "@ionic/core";
+import { PatientService } from '../../services/patient.service';
+import {IonicModule, ModalController} from '@ionic/angular';
+import {Router, RouterLink} from '@angular/router';
+import { DoctorUser, PatientUser } from '../../models/user.model';
 import {FormsModule} from "@angular/forms";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
+import { addIcons} from "ionicons";
+import {
+  calendar,
+  chatbubbles,
+  home,
+  homeOutline,
+  logOutOutline, menuOutline,
+  peopleOutline,
+  personAddOutline,
+  settings, statsChartOutline
+} from "ionicons/icons";
 
 @Component({
   selector: 'app-patient-dashboard',
   templateUrl: './patient-dashboard.page.html',
   styleUrls: ['./patient-dashboard.page.scss'],
-  standalone : true ,
-  imports: [IonicModule, CommonModule, FormsModule]
+  standalone: true ,
+  imports: [IonicModule, FormsModule, NgForOf, NgClass, NgIf]
 })
 export class PatientDashboardPage implements OnInit {
+  userName: string = '';
+  specializations: { name: string; image: string }[] = [
+    { name: 'Dermatologist', image: 'assets/images/specialty/allergy.png' },
+    { name: 'Neurologist', image: 'assets/images/specialty/Neurologist.png' },
+    { name: 'Gynaecology', image: 'assets/images/specialty/gynecology.png' },
+    { name: 'Oncologist', image: 'assets/images/specialty/oncologist.png' },
+    { name: 'Cardiologist', image: 'assets/images/specialty/Cardiologist.png' },
+    { name: 'Ophthalmologist', image: 'assets/images/specialty/eye-test.png' },
+    { name: 'Endocrinologist', image: 'assets/images/specialty/endocrine.png'},
+    { name: 'Psychiatry', image: 'assets/images/specialty/psychiatrist.png' },
+    { name: 'Emergency medicine', image: 'assets/images/specialty/first-aid-kit.png' },
+    { name: 'Family medicine', image: 'assets/images/specialty/medicine.png' },
+    { name: 'Gastroenterologist', image: 'assets/images/specialty/digestion.png' },
+    { name: 'Radiologist', image: 'assets/images/specialty/img_6.png' },
+    { name: 'Orthopaedist', image: 'assets/images/specialty/orthopaedist.png'},
+    { name: 'Pathology', image: 'assets/images/specialty/img_3.png'},
+    { name: 'Allergist', image: 'assets/images/specialty/img.png'},
+    { name: 'Anesthesiology', image: 'assets/images/specialty/img_4.png' },
+    { name: 'General surgery', image: 'assets/images/specialty/img_5.png' },
+    { name: 'Hematologist', image: 'assets/images/specialty/hematologist.png' },
+    { name: 'Immunology', image: 'assets/images/specialty/img_1.png'},
+    { name: 'Internal medicine', image: 'assets/images/specialty/internal medicine.png' },
+    { name: 'Nephrologist', image: 'assets/images/specialty/img_2.png' },
+    { name: 'Pediatrics', image: 'assets/images/specialty/patient.png' },
+  ];
+  displayedSpecializations: { name: string; image: string }[] = [];
   doctors: DoctorUser[] = [];
   filteredDoctors: DoctorUser[] = [];
-  searchTerm = '';
-  isLoading = false;
-  page = 1;
-  limit = 10;
-  private doctorUpdateSubscription: Subscription;
-  private authSubscription: Subscription;
-  private loadDoctorsTrigger = new BehaviorSubject<void>(undefined);
-  private loadDoctorsSubscription: Subscription;
+  selectedSpecialization: string | undefined = undefined;
+  isSpecializationsModalOpen: boolean = false;
+  searchQuery: string = '';
+  searchTerm: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
 
   constructor(
-    private router: Router,
-    private doctorService: DoctorService,
     private authService: AuthService,
-    private alertController: AlertController,
-    private loadingController: LoadingController,
-    private toastController: ToastController
+    private patientService: PatientService,
+    private modalController: ModalController,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     addIcons({
-      addOutline,
-      createOutline,
-      trashOutline,
-      arrowBackOutline,
-      searchOutline,
-      closeCircleOutline,
-      refreshOutline
-    });
-    this.doctorUpdateSubscription = this.doctorService.doctorListUpdated$.subscribe(() => {
-      console.log('Doctor list update triggered');
-      this.refresh();
-    });
-    this.authSubscription = this.authService.user$.subscribe(user => {
-      console.log('Auth state changed:', user ? user.firebaseUid : 'No user');
-      if (user) {
-        this.loadDoctorsTrigger.next();
-      } else {
-        this.presentToast('Please log in to view doctors.', 'danger');
-        this.router.navigateByUrl('/auth/login', { replaceUrl: true });
-      }
-    });
-    this.loadDoctorsSubscription = this.loadDoctorsTrigger.pipe(
-      debounceTime(100)
-    ).subscribe(() => {
-      if (!this.isLoading) {
-        this.loadDoctors();
-      }
-    });
+      peopleOutline,
+      personAddOutline,
+      logOutOutline,
+      homeOutline,
+      menuOutline,
+      statsChartOutline,
+      home,
+      calendar,
+      chatbubbles,
+      settings
+    })
   }
 
   ngOnInit() {
-    console.log('DoctorsListPage: ngOnInit');
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.loadDoctorsTrigger.next();
-    }
+    // Fetch user name
+    const user = this.authService.getCurrentUser() as PatientUser | null;
+    this.userName = user && user.role === 'patient' ? user.profile.firstName || 'Patient' : 'Patient';
+
+    // Display first three specializations initially
+    this.displayedSpecializations = this.specializations.slice(0, 3);
+
+    // Fetch initial doctors
+    this.loadDoctors();
   }
 
-  ngOnDestroy() {
-    console.log('DoctorsListPage: ngOnDestroy');
-    this.doctorUpdateSubscription.unsubscribe();
-    this.authSubscription.unsubscribe();
-    this.loadDoctorsSubscription.unsubscribe();
-  }
-
-  async loadDoctors(event?: InfiniteScrollCustomEvent) {
-    console.log('loadDoctors called');
-    const user = this.authService.getCurrentUser();
-    if (!user) {
-      console.warn('No user logged in during loadDoctors');
-      await this.presentToast('Please log in to view doctors.', 'danger');
-      this.router.navigateByUrl('/auth/login', { replaceUrl: true });
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Loading doctors...',
-      spinner: 'circles'
-    });
-    await loading.present();
-
+  loadDoctors(specialization?: string) {
+    this.errorMessage = ''; // Reset error message
     this.isLoading = true;
-    this.doctorService.getAllDoctors().subscribe({
+    this.patientService.getAllDoctors(specialization).subscribe({
       next: (doctors) => {
-        console.log('Doctors loaded:', doctors.length);
-        const start = (this.page - 1) * this.limit;
-        const newDoctors = doctors.slice(start, start + this.limit);
-        this.doctors = [...this.doctors, ...newDoctors];
-        this.filteredDoctors = [...this.doctors];
+        console.log('Doctors received from backend:', doctors);
+        this.doctors = doctors;
+        this.applyFilters();
         this.isLoading = false;
-        loading.dismiss();
-        if (event) {
-          event.target.complete();
-          if (newDoctors.length < this.limit) {
-            event.target.disabled = true;
-          }
-        }
-        this.page++;
+        this.cdr.detectChanges();
       },
-      error: async (error) => {
-        console.error('Error loading doctors:', error);
+      error: (err) => {
+        console.error('Failed to load doctors:', err);
+        this.errorMessage = 'Unable to load doctors. Please try again later.';
         this.isLoading = false;
-        loading.dismiss();
-        if (error.status === 401) {
-          console.log('401 error detected, waiting for interceptor retry');
-          await this.presentToast('Session expired. Please log in again.', 'danger');
-          this.router.navigateByUrl('/auth/login', { replaceUrl: true });
-        } else if (error.status === 0) {
-          console.error('Network or CORS error');
-          await this.presentToast('Unable to connect to the server. Please check your network or try again later.', 'danger');
-        } else {
-          await this.presentToast('Failed to load doctors. Please try again.', 'danger');
-        }
-        if (event) {
-          event.target.complete();
-        }
+        this.cdr.detectChanges();
       }
     });
   }
 
-  filterDoctors() {
-    console.log('Filtering doctors with term:', this.searchTerm);
-    if (!this.searchTerm) {
-      this.filteredDoctors = [...this.doctors];
+  applyFilters() {
+    let filtered = [...this.doctors];
+
+    // Filter by single specialization
+    if (this.selectedSpecialization) {
+      const normalizedSelected = this.selectedSpecialization.toLowerCase().trim();
+      filtered = filtered.filter(doctor => {
+        const doctorSpec = (doctor.profile.specialization || '').toLowerCase().trim();
+        const match = doctorSpec === normalizedSelected;
+        console.log(`Doctor: ${doctor.profile.firstName} ${doctor.profile.lastName}, Specialization: ${doctorSpec}, Match: ${match}`);
+        return match;
+      });
+    }
+
+    if (this.searchTerm) {
+      filtered = filtered.filter(doctor =>
+        `${doctor.profile.firstName} ${doctor.profile.lastName}`
+          .toLowerCase()
+          .includes(this.searchTerm.toLowerCase())
+      );
+    }
+
+    this.filteredDoctors = filtered.slice(0, 3); // Ensure only 3 doctors are displayed
+    console.log('Filtered doctors:', this.filteredDoctors);
+    this.cdr.detectChanges();
+  }
+
+  openSpecializationsModal() {
+    this.isSpecializationsModalOpen = true;
+  }
+
+  filterBySpecialization(specialization: string) {
+    // Toggle selection: if already selected, deselect; otherwise, select this one
+    if (this.selectedSpecialization === specialization) {
+      this.selectedSpecialization = undefined; // Deselect
+    } else {
+      this.selectedSpecialization = specialization; // Select new one
+    }
+    this.loadDoctors(this.selectedSpecialization);
+    this.isSpecializationsModalOpen = false; // Close modal after selection
+  }
+
+  viewAllDoctors() {
+    this.errorMessage = '';
+    this.isLoading = true;
+    this.patientService.getAllDoctors(this.selectedSpecialization).subscribe({
+      next: (doctors) => {
+        console.log('All doctors received:', doctors);
+        this.doctors = doctors;
+        this.applyFilters();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load all doctors:', err);
+        this.errorMessage = 'Unable to load doctors. Please try again later.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+  NavigateToAllDoctors() {
+    this.router.navigate(['/patient/all-doctors']);
+  }
+  onSearch() {
+    this.searchTerm = this.searchQuery.trim();
+    if (this.searchTerm === '') {
+      this.loadDoctors(this.selectedSpecialization);
       return;
     }
-    const term = this.searchTerm.toLowerCase();
-    this.filteredDoctors = this.doctors.filter(doctor =>
-      doctor.email.toLowerCase().includes(term) ||
-      doctor.profile.firstName.toLowerCase().includes(term) ||
-      doctor.profile.lastName.toLowerCase().includes(term) ||
-      (doctor.profile.specialization && doctor.profile.specialization.toLowerCase().includes(term))
-    );
-  }
-
-  clearSearch() {
-    console.log('Clearing search');
-    this.searchTerm = '';
-    this.filteredDoctors = [...this.doctors];
-  }
-
-  navigateToCreate() {
-    console.log('Navigating to create doctor');
-    this.router.navigateByUrl('/admin/doctors/create');
-  }
-
-  navigateToEdit(doctorId: string) {
-    console.log(`Navigating to edit doctor: ${doctorId}`);
-    this.router.navigateByUrl(`/admin/doctors/edit/${doctorId}`);
-  }
-
-  async confirmDelete(doctor: DoctorUser) {
-    const alert = await this.alertController.create({
-      header: 'Confirm Delete',
-      message: `Are you sure you want to delete Dr. ${doctor.profile.firstName} ${doctor.profile.lastName}?`,
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Delete',
-          role: 'destructive',
-          handler: () => {
-            this.deleteDoctor(doctor.firebaseUid);
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  async deleteDoctor(doctorId: string) {
-    console.log(`Deleting doctor: ${doctorId}`);
-    const loading = await this.loadingController.create({
-      message: 'Deleting doctor...',
-      spinner: 'circles'
-    });
-    await loading.present();
-
-    this.doctorService.deleteDoctor(doctorId).subscribe({
-      next: () => {
-        loading.dismiss();
-        this.presentToast('Doctor deleted successfully', 'success');
-        this.doctorService.notifyDoctorListUpdate();
+    this.errorMessage = '';
+    this.isLoading = true;
+    this.patientService.searchDoctors(this.searchTerm).subscribe({
+      next: (doctors) => {
+        console.log('Search results:', doctors);
+        this.doctors = doctors;
+        this.applyFilters();
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      error: async (error) => {
-        loading.dismiss();
-        console.error('Error deleting doctor:', error);
-        if (error.status === 401) {
-          await this.presentToast('Unauthorized access. Please log in again.', 'danger');
-          this.router.navigateByUrl('/auth/login', { replaceUrl: true });
-        } else if (error.status === 0) {
-          await this.presentToast('Unable to connect to the server. Please check your network or try again later.', 'danger');
-        } else {
-          await this.presentToast('Failed to delete doctor. Please try again.', 'danger');
-        }
+      error: (err) => {
+        console.error('Failed to search doctors:', err);
+        this.errorMessage = 'Unable to search doctors. Please try again later.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  async presentToast(message: string, color: 'success' | 'danger') {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2000,
-      color,
-      position: 'bottom'
+  viewDoctorDetails(doctor: DoctorUser) {
+    this.router.navigate(['patient/doctor-details'], {
+      queryParams: { doctor: JSON.stringify(doctor) }
     });
-    await toast.present();
-  }
-
-  goBack() {
-    console.log('Back button clicked');
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      console.log('Navigating to /admin/dashboard');
-      this.router.navigateByUrl('/admin/dashboard', { replaceUrl: true }).catch(err => {
-        console.error('Navigation error:', err);
-        this.presentToast('Failed to navigate back.', 'danger');
-      });
-    } else {
-      console.warn('No user authenticated, redirecting to login');
-      this.presentToast('Please log in to continue.', 'danger');
-      this.router.navigateByUrl('/auth/login', { replaceUrl: true });
-    }
-  }
-
-  refresh() {
-    console.log('Refreshing doctors list');
-    this.page = 1;
-    this.doctors = [];
-    this.filteredDoctors = [];
-    this.loadDoctorsTrigger.next();
   }
 }

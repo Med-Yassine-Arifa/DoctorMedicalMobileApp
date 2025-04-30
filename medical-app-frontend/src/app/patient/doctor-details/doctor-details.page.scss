@@ -1,0 +1,119 @@
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+.doctor-info {
+  text-align: center;
+  margin-bottom: 20px;
+
+  ion-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    margin: 0 0 5px 0;
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--ion-text-color);
+    opacity: 0.7;
+    margin: 0 0 10px 0;
+  }
+
+  .rating {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    ion-icon {
+      color: #f1c40f; /* Gold color for star */
+      font-size: 18px;
+      margin-right: 5px;
+    }
+    span {
+      font-size: 16px;
+      color: var(--ion-text-color);
+    }
+  }
+}
+
+.section {
+  margin-bottom: 20px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-text-color);
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+}
+
+.date-picker, .time-picker {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+
+  ion-button {
+    --border-radius: 10px;
+    --background: var(--ion-color-light);
+    --color: var(--ion-text-color);
+    margin-right: 10px;
+    width: 70px;
+    height: 70px;
+
+    &.selected {
+      --background: var(--ion-color-primary);
+      --color: var(--ion-color-primary-contrast);
+    }
+  }
+}
+
+.date-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .day {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .label {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+}
+
+.time-picker {
+  ion-button {
+    width: auto;
+    padding: 0 15px;
+    height: 40px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+
+  ion-button {
+    --border-radius: 20px;
+    width: 48%;
+  }
+}

@@ -50,11 +50,11 @@ export class DoctorFormPage implements OnInit {
   doctorId: string | null = null;
   weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   specializations = [
-    'Neurologist', 'Cardiologist', 'Dermatologist', 'Obstetrics and gynaecology', 'Oncologist',
+    'Neurologist', 'Cardiologist', 'Dermatologist', 'Gynaecology', 'Oncologist',
     'Endocrinologist', 'General surgery', 'Psychiatrist', 'Ophthalmologist', 'Emergency medicine',
     'Family medicine', 'Gastroenterologist', 'Pediatrics', 'Radiologist', 'Orthopaedist',
     'Pathology', 'Allergist', 'Anesthesiology', 'Hematologist', 'Immunology',
-    'Internal medicine', 'Nephrologist', 'Pulmonologist', 'Anesthesiologist'
+    'Internal medicine', 'Nephrologist',
   ];
 
   constructor(

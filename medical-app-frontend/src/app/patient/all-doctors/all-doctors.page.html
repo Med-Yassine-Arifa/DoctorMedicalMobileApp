@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button routerLink="/patient/patient-dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>All Doctors</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Error Message -->
+  <ion-text color="danger" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+  </ion-text>
+
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <!-- No Doctors Message -->
+  <ion-text color="medium" *ngIf="!isLoading && doctors.length === 0">
+    <p>No doctors found.</p>
+  </ion-text>
+
+  <!-- Doctor List -->
+  <div *ngIf="!isLoading && doctors.length > 0">
+    <ion-card class="doctor-card" *ngFor="let doctor of doctors" (click)="viewDoctorDetails(doctor)">
+      <ion-img [src]="doctor.image"></ion-img>
+      <ion-card-content>
+        <h4>{{ doctor.profile.firstName }} {{ doctor.profile.lastName }}</h4>
+        <p>{{ doctor.profile.specialization }}</p>
+        <p class="distance">
+          <ion-icon name="location-outline"></ion-icon>
+          {{ doctor.distance }}
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

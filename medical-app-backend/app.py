@@ -30,7 +30,7 @@ CORS(app, resources={r"/api/*": {
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
-app.register_blueprint(patient_bp, url_prefix='/api/patient')
+app.register_blueprint(patient_bp, url_prefix='/api')
 
 cred = credentials.Certificate('key/firebase-service-account.json')
 firebase_admin.initialize_app(cred)

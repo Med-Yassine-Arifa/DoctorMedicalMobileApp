@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="patient/patient-dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Doctor Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Doctor Info -->
+  <div class="doctor-info" *ngIf="doctor">
+    <ion-img [src]="doctor.image" [alt]="doctor.profile.firstName + ' ' + doctor.profile.lastName"></ion-img>
+    <h2>{{ doctor.profile.firstName }} {{ doctor.profile.lastName }}</h2>
+    <p>{{ doctor.profile.specialization }}</p>
+    <div class="rating">
+      <ion-icon name="star"></ion-icon>
+      <span>{{ doctor.rating }}</span>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="section">
+    <h3>Descriptions</h3>
+    <p>
+      There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.
+    </p>
+  </div>
+
+  <!-- Select Date -->
+  <div class="section">
+    <h3>Select Date</h3>
+    <div class="date-picker">
+      <ion-button *ngFor="let date of dates" [ngClass]="{'selected': selectedDate === date.day}" (click)="selectDate(date.day)">
+        <div class="date-button">
+          <div class="day">{{ date.day }}</div>
+          <div class="label">{{ date.label }}</div>
+        </div>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Select Time -->
+  <div class="section">
+    <h3>Select Time</h3>
+    <div class="time-picker">
+      <ion-button *ngFor="let time of times" [ngClass]="{'selected': selectedTime === time}" (click)="selectTime(time)">
+        {{ time }}
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <ion-button fill="outline" (click)="sendMessage()">Send Message</ion-button>
+    <ion-button fill="solid" (click)="bookAppointment()">Book Appointment</ion-button>
+  </div>
+</ion-content>

@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./patient/patient-dashboard/patient-dashboard.page').then( m => m.PatientDashboardPage)
   },
   {
+    path: 'patient/all-doctors',
+    loadComponent: () => import('./patient/all-doctors/all-doctors.page').then( m => m.AllDoctorsPage)
+  },
+  {
     path: 'patient/appointment-book',
     loadComponent: () => import('./patient/appointment-book/appointment-book.page').then( m => m.AppointmentBookPage)
   },
@@ -33,27 +37,27 @@ export const routes: Routes = [
     loadComponent: () => import('./patient/documents/documents.page').then( m => m.DocumentsPage)
   },
   {
-    path: 'notifications',
+    path: 'patient/notifications',
     loadComponent: () => import('./patient/notifications/notifications.page').then( m => m.NotificationsPage)
   },
   {
-    path: 'consultation',
+    path: 'patient/consultation',
     loadComponent: () => import('./patient/consultation/consultation.page').then( m => m.ConsultationPage)
   },
   {
-    path: 'appointments',
+    path: 'doctor/appointments',
     loadComponent: () => import('./doctor/appointments/appointments.page').then( m => m.AppointmentsPage)
   },
   {
-    path: 'consultation',
+    path: 'doctor/consultation',
     loadComponent: () => import('./doctor/consultation/consultation.page').then( m => m.ConsultationPage)
   },
   {
-    path: 'documents',
+    path: 'doctor/documents',
     loadComponent: () => import('./doctor/documents/documents.page').then( m => m.DocumentsPage)
   },
   {
-    path: 'profile',
+    path: 'doctor/profile',
     loadComponent: () => import('./doctor/profile/profile.page').then( m => m.ProfilePage)
   },
   {
@@ -88,6 +92,11 @@ export const routes: Routes = [
     path: 'admin/doctors',
     loadComponent: () => import('./admin/doctors/doctors-list/doctors-list.page').then( m => m.DoctorsListPage)
   },
+  {
+    path: 'patient/doctor-details',
+    loadComponent: () => import('./patient/doctor-details/doctor-details.page').then( m => m.DoctorDetailsPage)
+  },
+
 
 
 ];

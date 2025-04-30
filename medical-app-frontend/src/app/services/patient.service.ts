@@ -4,6 +4,7 @@ import { Observable, from, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { getAuth } from 'firebase/auth';
+import { DoctorUser } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -54,29 +55,14 @@ export class PatientService {
     );
   }
 
-  getPopularDoctors(specialization?: string): Observable<any[]> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => {
-        const url = specialization
-          ? `${this.apiUrl}/doctors/popular?specialization=${encodeURIComponent(specialization)}`
-          : `${this.apiUrl}/doctors/popular`;
-        return this.http.get<any[]>(url, { headers }).pipe(
-          catchError(error => {
-            console.error('Error fetching popular doctors:', error);
-            return throwError(() => new Error('Failed to fetch popular doctors'));
-          })
-        );
-      })
-    );
-  }
 
-  getAllDoctors(specialization?: string): Observable<any[]> {
+  getAllDoctors(specialization?: string): Observable<DoctorUser[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => {
         const url = specialization
           ? `${this.apiUrl}/doctors?specialization=${encodeURIComponent(specialization)}`
           : `${this.apiUrl}/doctors`;
-        return this.http.get<any[]>(url, { headers }).pipe(
+        return this.http.get<DoctorUser[]>(url, { headers }).pipe(
           catchError(error => {
             console.error('Error fetching all doctors:', error);
             return throwError(() => new Error('Failed to fetch all doctors'));
@@ -86,11 +72,11 @@ export class PatientService {
     );
   }
 
-  searchDoctors(query: string): Observable<any[]> {
+  searchDoctors(query: string): Observable<DoctorUser[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => {
         const url = `${this.apiUrl}/doctors/search?query=${encodeURIComponent(query)}`;
-        return this.http.get<any[]>(url, { headers }).pipe(
+        return this.http.get<DoctorUser[]>(url, { headers }).pipe(
           catchError(error => {
             console.error('Error searching doctors:', error);
             return throwError(() => new Error('Failed to search doctors'));

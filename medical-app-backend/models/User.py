@@ -134,3 +134,69 @@ def delete_user(firebase_uid):
     except Exception as e:
         print(f"Error deleting user: {e}")
         return False
+
+
+def get_all_doctors_patient(specialization=None):
+    doctors = []
+    try:
+        query = {'role': 'doctor'}
+        if specialization:
+            query['profile.specialization'] = specialization
+        # Sort by firstName and lastName
+        doctor_cursor = users_collection.find(query).sort([
+            ('profile.firstName', 1),
+            ('profile.lastName', 1)
+        ])
+        for doctor in doctor_cursor:
+            doctor_data = find_user_by_email(doctor['email'])
+            if doctor_data:
+                doctors.append(doctor_data)
+        return doctors
+    except Exception as e:
+        print(f"Error getting all doctors: {e}")
+        return []
+
+def get_popular_doctors(specialization=None):
+    doctors = []
+    try:
+        query = {'role': 'doctor'}
+        if specialization:
+            query['profile.specialization'] = specialization
+        # Sort by firstName and lastName, limit to 3
+        doctor_cursor = users_collection.find(query).sort([
+            ('profile.firstName', 1),
+            ('profile.lastName', 1)
+        ]).limit(3)
+        for doctor in doctor_cursor:
+            doctor_data = find_user_by_email(doctor['email'])
+            if doctor_data:
+                doctors.append(doctor_data)
+        return doctors
+    except Exception as e:
+        print(f"Error getting popular doctors: {e}")
+        return []
+
+def search_doctors(query):
+    doctors = []
+    try:
+        search_query = {
+            'role': 'doctor',
+            '$or': [
+                {'profile.firstName': {'$regex': query, '$options': 'i'}},
+                {'profile.lastName': {'$regex': query, '$options': 'i'}},
+                {'profile.specialization': {'$regex': query, '$options': 'i'}}
+            ]
+        }
+        # Sort by firstName and lastName
+        doctor_cursor = users_collection.find(search_query).sort([
+            ('profile.firstName', 1),
+            ('profile.lastName', 1)
+        ])
+        for doctor in doctor_cursor:
+            doctor_data = find_user_by_email(doctor['email'])
+            if doctor_data:
+                doctors.append(doctor_data)
+        return doctors
+    except Exception as e:
+        print(f"Error searching doctors: {e}")
+        return []

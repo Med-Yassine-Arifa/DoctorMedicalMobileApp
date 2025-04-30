@@ -1,0 +1,105 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Patient Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Greeting -->
+  <div class="greeting">
+    <h2>Hi, {{ userName }} 👋</h2>
+    <h1>Keep taking care of your health</h1>
+  </div>
+
+  <!-- Error Message -->
+  <ion-text color="danger" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+  </ion-text>
+
+  <!-- Search Bar -->
+  <ion-searchbar placeholder="Search doctors..." [(ngModel)]="searchQuery" (ionInput)="onSearch()"></ion-searchbar>
+
+  <!-- Specializations -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Specializations</h3>
+      <a class="see-all" (click)="openSpecializationsModal()">See All</a>
+    </div>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="4" *ngFor="let specialization of displayedSpecializations">
+          <ion-card class="specialization-card" [ngClass]="{'selected': selectedSpecialization === specialization.name}" (click)="filterBySpecialization(specialization.name)">
+            <ion-img [src]="specialization.image"></ion-img>
+            <ion-card-content>
+              <ion-card-title>{{ specialization.name }}</ion-card-title>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Filtered Doctors -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Popular Doctors</h3>
+      <a class="see-all" (click)="NavigateToAllDoctors()">See All</a>
+    </div>
+    <!-- Loading Spinner -->
+    <div class="loading-container" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+    <!-- No Doctors Message -->
+    <ion-text color="medium" *ngIf="!isLoading && filteredDoctors.length === 0">
+      <p>No doctors found.</p>
+    </ion-text>
+    <!-- Doctor List (Vertical) -->
+    <div *ngIf="!isLoading && filteredDoctors.length > 0">
+      <ion-card class="doctor-card" *ngFor="let doctor of filteredDoctors" (click)="viewDoctorDetails(doctor)">
+
+        <ion-card-content>
+          <h4>{{ doctor.profile.firstName }} {{ doctor.profile.lastName }}</h4>
+          <p>{{ doctor.profile.specialization }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Specializations Modal -->
+<ion-modal [isOpen]="isSpecializationsModalOpen" (didDismiss)="isSpecializationsModalOpen = false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>All Specializations</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="isSpecializationsModalOpen = false">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+        <ion-item *ngFor="let specialization of specializations" (click)="filterBySpecialization(specialization.name)">
+          <ion-img [src]="specialization.image" slot="start" class="modal-img"></ion-img>
+          <ion-label>{{ specialization.name }}</ion-label>
+          <ion-icon *ngIf="selectedSpecialization === specialization.name" name="checkmark-circle" slot="end" color="success"></ion-icon>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-tab-bar slot="bottom">
+  <ion-tab-button tab="home">
+    <ion-icon name="home"></ion-icon>
+  </ion-tab-button>
+  <ion-tab-button tab="calendar">
+    <ion-icon name="calendar"></ion-icon>
+  </ion-tab-button>
+  <ion-tab-button tab="chat">
+    <ion-icon name="chatbubbles"></ion-icon>
+  </ion-tab-button>
+  <ion-tab-button tab="settings">
+    <ion-icon name="settings"></ion-icon>
+  </ion-tab-button>
+</ion-tab-bar>
