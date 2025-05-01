@@ -32,10 +32,7 @@ export const routes: Routes = [
     path: 'patient/appointment-book',
     loadComponent: () => import('./patient/appointment-book/appointment-book.page').then( m => m.AppointmentBookPage)
   },
-  {
-    path: 'patient/appointments',
-    loadComponent: () => import('./patient/appointments/appointments.page').then( m => m.AppointmentsPage)
-  },
+
   {
     path: 'patient/documents',
     loadComponent: () => import('./patient/documents/documents.page').then( m => m.DocumentsPage)
@@ -44,18 +41,12 @@ export const routes: Routes = [
     path: 'patient/notifications',
     loadComponent: () => import('./patient/notifications/notifications.page').then( m => m.NotificationsPage)
   },
+
   {
-    path: 'patient/consultation',
-    loadComponent: () => import('./patient/consultation/consultation.page').then( m => m.ConsultationPage)
+    path: 'patient/medical-history',
+    loadComponent: () => import('./patient/medical-history/medical-history.page').then(m => m.MedicalHistoryPage)
   },
-  {
-    path: 'doctor/appointments',
-    loadComponent: () => import('./doctor/appointments/appointments.page').then( m => m.AppointmentsPage)
-  },
-  {
-    path: 'doctor/consultation',
-    loadComponent: () => import('./doctor/consultation/consultation.page').then( m => m.ConsultationPage)
-  },
+
   {
     path: 'doctor/documents',
     loadComponent: () => import('./doctor/documents/documents.page').then( m => m.DocumentsPage)
@@ -95,6 +86,31 @@ export const routes: Routes = [
   {
     path: 'admin/doctors',
     loadComponent: () => import('./admin/doctors/doctors-list/doctors-list.page').then( m => m.DoctorsListPage)
+  },
+  {
+    path: 'medical-history',
+    loadComponent: () => import('./patient/medical-history/medical-history.page').then( m => m.MedicalHistoryPage)
+  },
+  {
+    path: 'appointment-follow-up',
+    loadComponent: () => import('./doctor/appointment-follow-up/appointment-follow-up.page').then( m => m.AppointmentFollowUpPage)
+  },
+  {
+    path: 'consultation-form',
+    loadComponent: () => import('./doctor/consultation-form/consultation-form.page').then( m => m.ConsultationFormPage)
+  },
+
+  {
+    path: 'doctor/appointments',
+    loadComponent: () => import('./doctor/appointments/appointments.page').then(m => m.AppointmentsPage)
+  },
+  {
+    path: 'doctor/appointment-follow-up/:id',
+    loadComponent: () => import('./doctor/appointment-follow-up/appointment-follow-up.page').then(m => m.AppointmentFollowUpPage)
+  },
+  {
+    path: 'doctor/consultation-form/:id',
+    loadComponent: () => import('./doctor/consultation-form/consultation-form.page').then(m => m.ConsultationFormPage)
   },
 
 

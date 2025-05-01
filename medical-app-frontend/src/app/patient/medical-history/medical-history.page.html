@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Medical History</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <ion-accordion-group *ngIf="!isLoading && appointments.length > 0">
+    <ion-accordion *ngFor="let appointment of appointments">
+      <ion-item slot="header">
+        <ion-label>
+          <h2>Doctor ID: {{ appointment.doctorId }}</h2>
+          <p>Date: {{ appointment.date }}</p>
+          <p>Reason: {{ appointment.reason }}</p>
+          <p>Status: {{ appointment.status }}</p>
+        </ion-label>
+      </ion-item>
+      <div slot="content">
+        <ng-container *ngIf="getConsultationForAppointment(appointment.id) as consultation; else noConsultation">
+          <ion-item>
+            <ion-label>
+              <h3>Consultation Details</h3>
+              <p><strong>Diagnosis:</strong> {{ consultation.diagnosis }}</p>
+              <p><strong>Prescription:</strong> {{ consultation.prescription }}</p>
+              <p><strong>Notes:</strong> {{ consultation.notes || 'N/A' }}</p>
+              <p><strong>Doctor:</strong> {{ consultation.doctorName }}</p>
+              <p><strong>Created At:</strong> {{ consultation.createdAt | date:'medium' }}</p>
+              <div *ngIf="consultation.documents && consultation.documents.length > 0">
+                <h4>Documents:</h4>
+                <ion-button *ngFor="let doc of consultation.documents" [href]="getDocumentUrl(consultation.id, doc.fileName)" target="_blank" fill="outline" size="small">
+                  Download {{ doc.original_name }}
+                </ion-button>
+              </div>
+            </ion-label>
+          </ion-item>
+        </ng-container>
+        <ng-template #noConsultation>
+          <ion-item>
+            <ion-label>No consultation available for this appointment.</ion-label>
+          </ion-item>
+        </ng-template>
+      </div>
+    </ion-accordion>
+  </ion-accordion-group>
+
+  <div *ngIf="!isLoading && appointments.length === 0">
+    <p>No medical history found.</p>
+  </div>
+</ion-content>

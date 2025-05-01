@@ -1,4 +1,5 @@
 export interface Consultation {
+  doctorName: string;
   id: string;
   appointmentId: string;
   patientId: string;
@@ -6,6 +7,7 @@ export interface Consultation {
   diagnosis: string;
   prescription: string;
   documents: Array<{
+    original_name: string;
     documentId: string;
     fileName: string;
   }>;

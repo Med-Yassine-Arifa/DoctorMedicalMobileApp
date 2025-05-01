@@ -1,0 +1,32 @@
+<ion-content class="ion-padding full-height-content">
+  <form [formGroup]="consultationForm" (ngSubmit)="submit()" class="form-container">
+    <ion-item>
+      <ion-label position="floating">Diagnosis</ion-label>
+      <ion-input formControlName="diagnosis" type="text" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Prescription</ion-label>
+      <ion-input formControlName="prescription" type="text" required></ion-input>
+    </ion-item>
+    <ion-item class="notes-item">
+      <ion-label position="floating">Notes</ion-label>
+      <ion-textarea formControlName="notes" rows="8" auto-grow="true"></ion-textarea>
+    </ion-item>
+    <ion-item>
+      <ion-label>Attachments</ion-label>
+      <input type="file" multiple (change)="onFileChange($event)" />
+    </ion-item>
+    <ion-list *ngIf="selectedFiles.length">
+      <ion-item *ngFor="let file of selectedFiles">
+        <ion-label>{{ file.name }}</ion-label>
+      </ion-item>
+    </ion-list>
+    <div class="button-container">
+      <ion-button type="submit" color="primary" [disabled]="isSubmitting || consultationForm.invalid">
+        Confirm
+        <ion-spinner *ngIf="isSubmitting" name="dots"></ion-spinner>
+      </ion-button>
+      <ion-button type="button" color="medium" (click)="cancel()">Cancel</ion-button>
+    </div>
+  </form>
+</ion-content>

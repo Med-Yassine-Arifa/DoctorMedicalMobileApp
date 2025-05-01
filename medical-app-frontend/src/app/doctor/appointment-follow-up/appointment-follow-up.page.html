@@ -1,0 +1,103 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Appointment Follow-Up</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/doctor/appointments"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-spinner *ngIf="isLoading" name="crescent" class="ion-margin"></ion-spinner>
+
+  <ion-card *ngIf="errorMessage" color="danger">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="appointment && !isLoading">
+    <ion-card-header>
+      <ion-card-title>Appointment Details</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Patient ID</ion-label>
+        <ion-text slot="end">{{ appointment.patientId }}</ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Date</ion-label>
+        <ion-text slot="end">{{ appointment.date | date: 'medium' }}</ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Duration</ion-label>
+        <ion-text slot="end">{{ appointment.duration }} minutes</ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Reason</ion-label>
+        <ion-text slot="end">{{ appointment.reason }}</ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Status</ion-label>
+        <ion-text slot="end">{{ appointment.status }}</ion-text>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!consultation && !showConsultationForm && !isLoading">
+    <ion-card-header>
+      <ion-card-title>No Consultation</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>No consultation has been added for this appointment.</p>
+      <ion-button expand="block" color="primary" (click)="toggleConsultationForm()">
+        Add Consultation
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="consultation && !showConsultationForm && !isLoading">
+    <ion-card-header>
+      <ion-card-title>Consultation Details</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Diagnosis</ion-label>
+        <ion-text slot="end">{{ consultation.diagnosis }}</ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Prescription</ion-label>
+        <ion-text slot="end">{{ consultation.prescription }}</ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Notes</ion-label>
+        <ion-text slot="end">{{ consultation.notes || 'None' }}</ion-text>
+      </ion-item>
+      <ion-item *ngIf="consultation.documents?.length">
+        <ion-label>Attachments</ion-label>
+        <ion-list slot="end">
+          <ion-item *ngFor="let doc of consultation.documents">
+            <ion-label>{{ doc.original_name }}</ion-label>
+            <ion-button slot="end" fill="clear" (click)="downloadDocument(doc.fileName)">
+              <ion-icon name="download-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-item>
+      <ion-button expand="block" color="primary" (click)="editConsultation()">Edit Consultation</ion-button>
+      <ion-button expand="block" color="danger" (click)="deleteConsultation()">Delete Consultation</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="showConsultationForm && appointment && !isLoading" class="full-height-card">
+    <ion-card-header>
+      <ion-card-title>{{ consultation ? 'Edit Consultation' : 'Add Consultation' }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <app-consultation-form
+        [appointment]="appointment"
+        [consultation]="consultation"
+        (consultationCreated)="onConsultationCreated()"
+        (consultationUpdated)="onConsultationUpdated()"
+      ></app-consultation-form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

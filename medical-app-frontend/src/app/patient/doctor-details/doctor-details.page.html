@@ -8,6 +8,16 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
   <!-- Doctor Info -->
   <div class="doctor-info" *ngIf="doctor">
     <ion-img [src]="doctor.image" [alt]="doctor.profile.firstName + ' ' + doctor.profile.lastName"></ion-img>
@@ -48,6 +58,14 @@
         {{ time }}
       </ion-button>
     </div>
+  </div>
+
+  <!-- Reason for Appointment -->
+  <div class="section">
+    <h3>Reason for Appointment</h3>
+    <ion-item>
+      <ion-input type="text" [(ngModel)]="reason" placeholder="Enter reason for appointment"></ion-input>
+    </ion-item>
   </div>
 
   <!-- Action Buttons -->

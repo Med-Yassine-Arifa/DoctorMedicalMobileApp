@@ -1,13 +1,57 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>appointments</ion-title>
+    <ion-title>Appointments</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleView()">
+        {{ showCalendar ? 'List View' : 'Calendar View' }}
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">appointments</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <div *ngIf="!showCalendar">
+    <div *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <h3>Pending Appointment Requests</h3>
+    <ion-list *ngIf="!isLoading && pendingAppointments.length > 0">
+      <ion-item *ngFor="let appointment of pendingAppointments">
+        <ion-label>
+          <h2>Patient ID: {{ appointment.patientId }}</h2>
+          <p>Date: {{ appointment.date }}</p>
+          <p>Reason: {{ appointment.reason }}</p>
+          <p>Status: {{ appointment.status }}</p>
+        </ion-label>
+        <ion-button slot="end" color="success" (click)="acceptAppointment(appointment.id)">Accept</ion-button>
+        <ion-button slot="end" color="danger" (click)="rejectAppointment(appointment.id)">Reject</ion-button>
+      </ion-item>
+    </ion-list>
+
+    <h3>Confirmed Appointments</h3>
+    <ion-list *ngIf="!isLoading && confirmedAppointments.length > 0">
+      <ion-item *ngFor="let appointment of confirmedAppointments">
+        <ion-label>
+          <h2>Patient ID: {{ appointment.patientId }}</h2>
+          <p>Date: {{ appointment.date }}</p>
+          <p>Reason: {{ appointment.reason }}</p>
+          <p>Status: {{ appointment.status }}</p>
+        </ion-label>
+        <ion-button slot="end" (click)="manageConsultation(appointment.id, $event)">Manage Consultation</ion-button>
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="!isLoading && pendingAppointments.length === 0 && confirmedAppointments.length === 0">
+      <p>No appointments found.</p>
+    </div>
+  </div>
+
+  <div *ngIf="showCalendar">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </div>
 </ion-content>
