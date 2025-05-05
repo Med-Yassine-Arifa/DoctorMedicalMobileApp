@@ -31,10 +31,35 @@ export class ConsultationService {
   getConsultationByAppointment(appointmentId: string): Observable<Consultation | null> {
     return this.getHeaders().pipe(
       switchMap(headers =>
-        this.http.get<Consultation>(`${this.apiUrl}/consultations/appointment/${appointmentId}`, { headers }).pipe(
+        this.http.get<any>(`${this.apiUrl}/consultations/appointment/${appointmentId}`, { headers }).pipe(
           map(consultation => ({
             ...consultation,
-            id: consultation.id
+            id: consultation._id
+          })),
+          catchError(error => {
+            if (error.status === 404) {
+              return throwError(() => null);
+            } else if (error.status === 403) {
+              console.log('Unauthorized: Not your consultation');
+              return throwError(() => new Error('Unauthorized: You do not have permission to view this consultation'));
+            }
+            console.error('Error fetching consultation by appointment:', error);
+            return throwError(() =>
+              new Error(error.error?.error || 'Failed to fetch consultation')
+            );
+          })
+        )
+      )
+    );
+  }
+
+  getConsultationByAppointmentPatientVersion(appointmentId: string): Observable<Consultation | null> {
+    return this.getHeaders().pipe(
+      switchMap(headers =>
+        this.http.get<any>(`${this.apiUrl}/patient/consultation/appointment/${appointmentId}`, { headers }).pipe(
+          map(consultation => ({
+            ...consultation,
+            id: consultation._id
           })),
           catchError(error => {
             if (error.status === 404) {
@@ -73,10 +98,14 @@ export class ConsultationService {
     );
   }
 
-  deleteConsultation(id: string): Observable<void> {
+  deleteConsultation(consultationId: string): Observable<void> {
+    if (!consultationId) {
+      console.error('Missing consultation ID!');
+      return throwError(() => new Error('Missing consultation ID!'));
+    }
     return this.getHeaders().pipe(
       switchMap(headers =>
-        this.http.delete<void>(`${this.apiUrl}/consultations/${id}`, { headers })
+        this.http.delete<void>(`${this.apiUrl}/consultations/${consultationId}`, { headers })
       ),
       catchError(error => {
         console.error('Error deleting consultation:', error);
@@ -114,17 +143,6 @@ export class ConsultationService {
     );
   }
 
-  getConsultation(id: string): Observable<Consultation> {
-    return this.getHeaders().pipe(
-      switchMap((headers: HttpHeaders) =>
-        this.http.get<Consultation>(`${this.apiUrl}/consultations/${id}`, { headers })
-      ),
-      catchError(error => {
-        console.error('Error fetching consultation:', error);
-        return throwError(() => new Error(error.error?.error || 'Failed to fetch consultation'));
-      })
-    );
-  }
 
   updateConsultation(id: string, updates: Partial<Consultation>): Observable<void> {
     return this.getHeaders().pipe(

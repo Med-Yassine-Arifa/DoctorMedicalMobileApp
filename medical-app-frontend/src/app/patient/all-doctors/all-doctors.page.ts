@@ -23,7 +23,7 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonSpinner, IonText, IonButtons, IonBackButton, IonCard, IonImg, IonCardContent, IonIcon, RouterLink]
 })
 export class AllDoctorsPage implements OnInit {
-  doctors: (DoctorUser & { image: string; distance: string })[] = [];
+  doctors: (DoctorUser)[] = [];
   selectedSpecialization: string | undefined = undefined;
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -53,8 +53,10 @@ export class AllDoctorsPage implements OnInit {
        this.doctors = doctors.map(doctor => ({
           ...doctor,
           image: `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 100)}.jpg`,
-          distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km away`
+          distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km away`,
+          rating: Math.random() * 5
         }));
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -66,10 +68,12 @@ export class AllDoctorsPage implements OnInit {
       }
     });
   }
-
   viewDoctorDetails(doctor: DoctorUser) {
     this.router.navigate(['patient/doctor-details'], {
-      queryParams: { doctor: JSON.stringify(doctor) }
+      queryParams: { doctorId: doctor.firebaseUid },
+      state: { doctor }
+
     });
+
   }
 }

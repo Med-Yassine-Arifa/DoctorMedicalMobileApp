@@ -50,7 +50,9 @@ export class DashboardPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadDoctorCount();
   }
-
+  ngAfterViewInit() {
+    this.loadDoctorCount();
+  }
   ngOnDestroy() {
     this.doctorUpdateSubscription.unsubscribe();
   }

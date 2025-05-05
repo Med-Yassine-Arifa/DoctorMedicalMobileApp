@@ -20,12 +20,12 @@
     </ion-card-header>
     <ion-card-content>
       <ion-item>
-        <ion-label>Patient ID</ion-label>
-        <ion-text slot="end">{{ appointment.patientId }}</ion-text>
+        <ion-label>Name</ion-label>
+        <ion-text slot="end">{{ appointment.patientName }}</ion-text>
       </ion-item>
       <ion-item>
         <ion-label>Date</ion-label>
-        <ion-text slot="end">{{ appointment.date | date: 'medium' }}</ion-text>
+        <ion-text slot="end">{{ appointment.date | date: 'medium':'UTC' }}</ion-text>
       </ion-item>
       <ion-item>
         <ion-label>Duration</ion-label>
@@ -59,6 +59,10 @@
       <ion-card-title>Consultation Details</ion-card-title>
     </ion-card-header>
     <ion-card-content>
+      <ion-item>
+        <ion-label>Consultation Id</ion-label>
+        <ion-text slot="end">{{ consultation.id }}</ion-text>
+      </ion-item>
       <ion-item>
         <ion-label>Diagnosis</ion-label>
         <ion-text slot="end">{{ consultation.diagnosis }}</ion-text>

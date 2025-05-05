@@ -1,13 +1,25 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>tabs</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">tabs</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+    <ion-tab-button tab="dashboard" [routerLink]="['/patient/patient-dashboard']">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Dashboard</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="medical history"  >
+      <ion-icon name="file-tray-full-outline"></ion-icon>
+      <ion-label>History</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="Upcoming appointments">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <ion-label>Upcoming</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="notifications" >
+      <ion-icon name="notifications-outline"></ion-icon>
+      <ion-label>Alerts</ion-label>
+    </ion-tab-button>
+
+  </ion-tab-bar>
+</ion-tabs>

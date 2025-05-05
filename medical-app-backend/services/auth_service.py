@@ -1,6 +1,6 @@
 import random
 
-import bcrypt
+
 import secrets
 from datetime import datetime, timezone
 import sys
@@ -12,12 +12,6 @@ else:
     from datetime import timezone
     UTC = timezone.utc
 from models.User import find_user_by_email, create_user, update_user
-
-def hash_password(password):
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-def check_password(password, hashed_password):
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def generate_otp():
     return str(random.randint(10000, 99999))

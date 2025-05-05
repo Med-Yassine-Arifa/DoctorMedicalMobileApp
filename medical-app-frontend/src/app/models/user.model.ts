@@ -25,6 +25,9 @@ export interface PatientUser extends User {
 }
 
 export interface DoctorUser extends User {
+  image: string | undefined;
+  rating : number  | undefined;
+  distance : string | undefined;
   role: 'doctor';
   profile: Profile & {
     specialization: string;

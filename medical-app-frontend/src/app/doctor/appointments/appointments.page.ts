@@ -29,6 +29,7 @@ export class AppointmentsPage implements OnInit {
   showCalendar: boolean = false;
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin],
+    timeZone: 'UTC',
     initialView: 'timeGridWeek',
     events: [],
     headerToolbar: {
@@ -48,7 +49,7 @@ export class AppointmentsPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadAppointments();
+    this.loadPendingAppointments();
   }
 
   async presentToast(message: string, color: string = 'success') {
@@ -61,13 +62,20 @@ export class AppointmentsPage implements OnInit {
     await toast.present();
   }
 
-  loadAppointments() {
+  loadPendingAppointments() {
     this.isLoading = true;
     this.errorMessage = '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     this.appointmentService.getDoctorAppointments('pending').subscribe({
       next: (appointments) => {
-        this.pendingAppointments = appointments;
+        appointments.forEach(appt => {
+          const apptDate = new Date(appt.date);
+          if (apptDate >= today && appt.status === 'pending') {
+            this.pendingAppointments.push(appt);
+          }
+        })
         this.isLoading = false;
       },
       error: (err) => {
@@ -81,7 +89,7 @@ export class AppointmentsPage implements OnInit {
       next: (appointments) => {
         this.confirmedAppointments = appointments;
         this.calendarOptions.events = appointments.map(appt => ({
-          title: `Patient ID: ${appt.patientId}`,
+          title: `Patient : ${appt.patientName}`,
           start: appt.date,
           duration: appt.duration
         }));
@@ -95,8 +103,9 @@ export class AppointmentsPage implements OnInit {
   acceptAppointment(appointmentId: string) {
     this.appointmentService.updateAppointmentStatus(appointmentId, 'confirmed').subscribe({
       next: () => {
+        this.pendingAppointments = this.pendingAppointments.filter(appt => appt.id !== appointmentId);
         this.presentToast('Appointment confirmed.');
-        this.loadAppointments();
+        this.loadPendingAppointments();
       },
       error: (err) => {
         this.presentToast('Failed to confirm appointment.', 'danger');
@@ -107,8 +116,11 @@ export class AppointmentsPage implements OnInit {
   rejectAppointment(appointmentId: string) {
     this.appointmentService.updateAppointmentStatus(appointmentId, 'rejected').subscribe({
       next: () => {
+        this.pendingAppointments = this.pendingAppointments.filter(appt => appt.id !== appointmentId);
+
         this.presentToast('Appointment rejected.');
-        this.loadAppointments();
+        this.loadPendingAppointments();
+
       },
       error: (err) => {
         this.presentToast('Failed to reject appointment.', 'danger');

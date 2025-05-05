@@ -6,6 +6,8 @@ import { ConsultationService } from '../../services/consultation.service';
 import { Appointment } from '../../models/appointment.model';
 import { Consultation } from '../../models/consultation.model';
 import { environment } from '../../../environments/environment';
+import {RouterLink} from "@angular/router";
+
 
 @Component({
   selector: 'app-medical-history',
@@ -15,12 +17,16 @@ import { environment } from '../../../environments/environment';
     IonicModule,
     NgForOf,
     NgIf,
-    DatePipe
+    DatePipe,
+    RouterLink
   ],
   standalone: true
 })
+
+
 export class MedicalHistoryPage implements OnInit {
-  appointments: Appointment[] = [];
+  confirmedAppointments: Appointment[] = [];
+  rejectedAppointments: Appointment[] = [];
   consultations: Consultation[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -52,7 +58,7 @@ export class MedicalHistoryPage implements OnInit {
     // Load appointments
     this.appointmentService.getPatientAppointments().subscribe({
       next: (appointments) => {
-        this.appointments = appointments;
+        this.categorizeAppointments(appointments);
         this.loadConsultations();
       },
       error: (err) => {
@@ -60,6 +66,30 @@ export class MedicalHistoryPage implements OnInit {
         this.errorMessage = err.message;
         this.presentToast('Failed to load appointments.');
       }
+    });
+  }
+
+  categorizeAppointments(appointments: Appointment[]) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to midnight
+
+    this.confirmedAppointments = [];
+    this.rejectedAppointments = [];
+
+    appointments.forEach((appt) => {
+      const apptDate = new Date(appt.date);
+      if(appt.status === 'rejected') {
+        this.rejectedAppointments.push(appt);
+      }
+      if (apptDate <= today) {
+        if (appt.status === 'confirmed') {
+          this.confirmedAppointments.push(appt);
+        } else if (appt.status === 'pending') {
+          this.rejectedAppointments.push(appt);
+          appt.status = 'rejected';
+        }
+      }
+
     });
   }
 

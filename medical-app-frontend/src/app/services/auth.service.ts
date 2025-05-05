@@ -87,6 +87,9 @@ export class AuthService {
             } as PatientUser;
           } else if (role === 'doctor') {
             appUser = {
+              image: '',
+              distance: '',
+              rating: undefined,
               firebaseUid: user.uid,
               email: user.email || '',
               role: 'doctor',
@@ -166,7 +169,9 @@ export class AuthService {
                   } as PatientUser;
                 } else if (role === 'doctor') {
                   appUser = {
-
+                    image: '',
+                    distance: '',
+                    rating: undefined,
                     firebaseUid: user.uid,
                     email: email,
                     role: 'doctor',

@@ -61,6 +61,28 @@ export class AppointmentService {
     );
   }
 
+
+  getAppointmentDoctorId(doctorId: string, status: string[]= ['confirmed', 'pending']): Observable<Appointment[]> {
+    return this.authService.getAuthToken().pipe(
+      switchMap(token => {
+        if (!token) {
+          return throwError(() => new Error('No authentication token available'));
+        }
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+        return this.http.get<Appointment[]>(
+          `${this.apiUrl}/appointments/doctor/${doctorId}?status=${status}`,
+          { headers }
+        ).pipe(
+          catchError(err => {
+            return throwError(() => new Error(err.error?.error || 'Failed to fetch appointments'));
+          })
+        );
+      })
+    );
+  }
+
   getDoctorAppointments(status: string = 'pending'): Observable<Appointment[]> {
     return this.authService.getAuthToken().pipe(
       switchMap(token => {

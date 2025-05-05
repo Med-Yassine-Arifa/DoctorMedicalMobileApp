@@ -33,6 +33,9 @@ import {
 export class DoctorFormPage implements OnInit {
   doctorForm: FormGroup;
   doctor: DoctorUser = {
+    image: '',
+    rating: 0,
+    distance: '',
     firebaseUid: '',
     email: '',
     role: 'doctor',
@@ -192,7 +195,7 @@ export class DoctorFormPage implements OnInit {
         this.doctorService.createDoctor(doctorData).subscribe({
           next: () => {
             this.presentToast('Doctor created successfully', 'success');
-            //this.doctorService.notifyDoctorListUpdate();
+            this.doctorService.notifyDoctorListUpdate();
             this.router.navigateByUrl('/admin/doctors');
           },
           error: async (error) => {

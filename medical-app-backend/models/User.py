@@ -51,6 +51,20 @@ def find_user_by_id(firebase_uid):
         return None
 
 
+def get_user_full_name(firebase_uid):
+    try:
+        user = users_collection.find_one({'firebaseUid': firebase_uid})
+        if user and 'profile' in user:
+            first_name = user['profile'].get('firstName', '')
+            last_name = user['profile'].get('lastName', '')
+            return f"{first_name} {last_name}".strip()
+        return None
+    except Exception as e:
+        print(f"Error getting full name: {e}")
+        return None
+
+
+
 def get_all_doctors():
     doctors = []
     try:

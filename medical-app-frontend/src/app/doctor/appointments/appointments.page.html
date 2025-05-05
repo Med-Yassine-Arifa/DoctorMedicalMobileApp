@@ -23,7 +23,8 @@
     <ion-list *ngIf="!isLoading && pendingAppointments.length > 0">
       <ion-item *ngFor="let appointment of pendingAppointments">
         <ion-label>
-          <h2>Patient ID: {{ appointment.patientId }}</h2>
+          <h1>Patient Name: {{ appointment.patientName }}</h1>
+
           <p>Date: {{ appointment.date }}</p>
           <p>Reason: {{ appointment.reason }}</p>
           <p>Status: {{ appointment.status }}</p>
@@ -37,7 +38,7 @@
     <ion-list *ngIf="!isLoading && confirmedAppointments.length > 0">
       <ion-item *ngFor="let appointment of confirmedAppointments">
         <ion-label>
-          <h2>Patient ID: {{ appointment.patientId }}</h2>
+          <h2>Patient Name: {{ appointment.patientName }}</h2>
           <p>Date: {{ appointment.date }}</p>
           <p>Reason: {{ appointment.reason }}</p>
           <p>Status: {{ appointment.status }}</p>

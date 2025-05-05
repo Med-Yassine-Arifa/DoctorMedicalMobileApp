@@ -1,0 +1,9 @@
+Supervised Learning : 
+	Regression : predict a number from infintly many possible numbers
+	Classfication : predict categories don t have to be numbers small 			possible 
+			
+Unsupervised Learning : Find something interesting in unlabled data 
+	Clustering aloghrithm : takes a data without labels and tries 		automatically group them into clusters 
+	Anomaly Detection : Find unsual data points 
+	Dimensionality reduction : Compress data using fewer numbers 
+	

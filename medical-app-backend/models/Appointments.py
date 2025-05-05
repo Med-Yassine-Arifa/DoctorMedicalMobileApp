@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime, UTC
 
+from models.User import get_user_full_name
+
 client = MongoClient('mongodb+srv://arifamohamedyassine1234:YHSnqgUTa1E20ngU@medicalapp.ndeyixq.mongodb.net/')
 db = client['medical_app']
 appointments_collection = db['appointments']
@@ -28,8 +30,8 @@ def get_appointments_by_doctor(doctor_id: str, status: str = None):
         query['status'] = status
     appointments = appointments_collection.find(query)
     return [
-        {
-            'id': str(appt['_id']),
+        {   'id': str(appt['_id']),
+            'patientName': get_user_full_name(appt['patientId']),
             'patientId': appt['patientId'],
             'doctorId': appt['doctorId'],
             'date': appt['date'],
@@ -45,7 +47,7 @@ def get_appointments_by_doctor(doctor_id: str, status: str = None):
 def get_appointments_by_patient(patient_id: str):
     appointments = appointments_collection.find({'patientId': patient_id})
     return [
-        {
+        {   'doctorName':get_user_full_name(appt['doctorId']),
             'id': str(appt['_id']),
             'patientId': appt['patientId'],
             'doctorId': appt['doctorId'],
@@ -74,6 +76,7 @@ def get_appointment_by_id(appointment_id: str):
     appointment = appointments_collection.find_one({'_id': ObjectId(appointment_id)})
     if appointment:
         return {
+            'patientName':get_user_full_name(appointment['patientId']),
             'id': str(appointment['_id']),
             'patientId': appointment['patientId'],
             'doctorId': appointment['doctorId'],

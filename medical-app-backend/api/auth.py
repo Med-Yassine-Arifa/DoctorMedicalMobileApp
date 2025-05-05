@@ -2,7 +2,7 @@ from bson import ObjectId
 from flask import Blueprint, request, jsonify
 from firebase_admin import auth
 from models.User import find_user_by_email, create_user, update_user, find_user_by_id, update_user_email, db
-from services.auth_service import hash_password, check_password, generate_otp, validate_otp, create_user_account, \
+from services.auth_service import generate_otp, validate_otp, create_user_account, \
     create_doctor_account
 from utils.mail import send_otp_email
 from middleware.auth_middleware import firebase_auth_required

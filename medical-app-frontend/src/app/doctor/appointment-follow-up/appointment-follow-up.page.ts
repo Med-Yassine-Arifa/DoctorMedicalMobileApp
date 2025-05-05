@@ -90,7 +90,9 @@ export class AppointmentFollowUpPage implements OnInit {
 
   loadConsultation(appointmentId: string) {
     this.consultationService.getConsultationByAppointment(appointmentId).subscribe({
+
       next: (consultation) => {
+
         this.consultation = consultation;
         this.isLoading = false;
         this.showConsultationForm = false;

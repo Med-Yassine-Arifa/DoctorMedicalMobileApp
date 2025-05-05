@@ -1,14 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import {catchError, delay, map, retryWhen, switchMap, take} from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { getAuth } from 'firebase/auth';
-import { DoctorUser } from '../models/user.model';
+import {AvailabilitySlot, DoctorUser} from '../models/user.model';
 
+interface DoctorResponse {
+  firebaseUid: string;
+  email: string;
+  role: 'doctor';
+  profile: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    address: string;
+    specialization: string;
+    licenseNumber: string;
+  };
+  availability: AvailabilitySlot[];
+  createdAt: string;
+  updatedAt: string;
+}
 @Injectable({
   providedIn: 'root'
 })
+
 export class PatientService {
   private apiUrl = environment.apiUrl;
 
@@ -83,6 +100,45 @@ export class PatientService {
             return throwError(() => new Error('Failed to fetch popular doctors'));
           })
         );
+      })
+    );
+  }
+
+  getDoctor(doctorId: string): Observable<DoctorUser> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.get<DoctorResponse>(`${environment.apiUrl}/doctors/${doctorId}`, { headers }).pipe(
+          map(response => ({
+            firebaseUid: response.firebaseUid,
+            email: response.email,
+            role: response.role,
+            profile: {
+              firstName: response.profile.firstName,
+              lastName: response.profile.lastName,
+              phone: response.profile.phone || '',
+              address: response.profile.address || '',
+              specialization: response.profile.specialization || '',
+              licenseNumber: response.profile.licenseNumber || ''
+            },
+            availability: response.availability || [],
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt
+          } as DoctorUser))
+        )
+      ),
+      retryWhen(errors =>
+        errors.pipe(
+          delay(1000),
+          take(2),
+          catchError(error => {
+            console.error('Error in getDoctor after retries:', error);
+            return throwError(() => error);
+          })
+        )
+      ),
+      catchError(error => {
+        console.error('Error in getDoctor:', error);
+        return throwError(() => error);
       })
     );
   }

@@ -25,12 +25,16 @@ cred = credentials.Certificate('key/firebase-service-account.json')
 firebase_admin.initialize_app(cred)
 # Initialize extensions
 mail = Mail(app)
-CORS(app, origins=["http://localhost:8100"], supports_credentials=True)
-
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:8100"}})
 
 
+CORS(app, resources={r"/api/*": {
+        "origins": ["http://localhost:8100", "http://192.168.43.23:8100", "*"],
+    }})
 
+
+@app.route('/')
+def home():
+    print(request.headers)
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
@@ -44,4 +48,4 @@ app.register_blueprint(consultation_bp, url_prefix='/api/consultation')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -108,7 +108,6 @@ export class DoctorsListPage implements OnInit, OnDestroy {
       spinner: 'circles'
     });
     await loading.present();
-
     this.isLoading = true;
     this.doctorService.getAllDoctors().subscribe({
       next: (doctors) => {
@@ -242,6 +241,7 @@ export class DoctorsListPage implements OnInit, OnDestroy {
     if (user) {
       console.log('Navigating to /admin/dashboard');
       this.router.navigateByUrl('/admin/dashboard', { replaceUrl: true }).catch(err => {
+        this.doctorService.notifyDoctorListUpdate();
         console.error('Navigation error:', err);
         this.presentToast('Failed to navigate back.', 'danger');
       });

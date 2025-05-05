@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import {TabsPage} from "./patient/tabs/tabs.page";
 
 
 export const routes: Routes = [
@@ -6,54 +7,6 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'auth/login',
     pathMatch: 'full'
-  },
-
-  {
-    path: 'tabs',
-    loadComponent: () => import('./patient/tabs/tabs.page').then( m => m.TabsPage)
-  },
-  {
-    path: 'tabs',
-    loadComponent: () => import('./doctor/tabs/tabs.page').then( m => m.TabsPage)
-  },
-  {
-    path: 'patient/patient-dashboard',
-    loadComponent: () => import('./patient/patient-dashboard/patient-dashboard.page').then( m => m.PatientDashboardPage)
-  },
-  {
-    path: 'patient/all-doctors',
-    loadComponent: () => import('./patient/all-doctors/all-doctors.page').then( m => m.AllDoctorsPage)
-  },
-  {
-    path: 'patient/doctor-details',
-    loadComponent: () => import('./patient/doctor-details/doctor-details.page').then( m => m.DoctorDetailsPage)
-  },
-  {
-    path: 'patient/appointment-book',
-    loadComponent: () => import('./patient/appointment-book/appointment-book.page').then( m => m.AppointmentBookPage)
-  },
-
-  {
-    path: 'patient/documents',
-    loadComponent: () => import('./patient/documents/documents.page').then( m => m.DocumentsPage)
-  },
-  {
-    path: 'patient/notifications',
-    loadComponent: () => import('./patient/notifications/notifications.page').then( m => m.NotificationsPage)
-  },
-
-  {
-    path: 'patient/medical-history',
-    loadComponent: () => import('./patient/medical-history/medical-history.page').then(m => m.MedicalHistoryPage)
-  },
-
-  {
-    path: 'doctor/documents',
-    loadComponent: () => import('./doctor/documents/documents.page').then( m => m.DocumentsPage)
-  },
-  {
-    path: 'doctor/profile',
-    loadComponent: () => import('./doctor/profile/profile.page').then( m => m.ProfilePage)
   },
   {
     path: 'auth/login',
@@ -87,10 +40,62 @@ export const routes: Routes = [
     path: 'admin/doctors',
     loadComponent: () => import('./admin/doctors/doctors-list/doctors-list.page').then( m => m.DoctorsListPage)
   },
+
+
   {
-    path: 'medical-history',
-    loadComponent: () => import('./patient/medical-history/medical-history.page').then( m => m.MedicalHistoryPage)
+    path: 'patient',
+    component: TabsPage,
+    children: [
+      {
+        path: '',
+        redirectTo: 'patient-dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'patient-dashboard',
+        loadComponent: () => import('./patient/patient-dashboard/patient-dashboard.page').then(m => m.PatientDashboardPage)
+      },
+      {
+        path: 'all-doctors',
+        loadComponent: () => import('./patient/all-doctors/all-doctors.page').then(m => m.AllDoctorsPage)
+      },
+      {
+        path: 'doctor-details',
+        loadComponent: () => import('./patient/doctor-details/doctor-details.page').then(m => m.DoctorDetailsPage)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./patient/notifications/notifications.page').then(m => m.NotificationsPage)
+      },
+      {
+        path: 'medical history',
+        loadComponent: () => import('./patient/medical-history/medical-history.page').then(m => m.MedicalHistoryPage)
+      },
+      {
+        path: 'Upcoming appointments',
+        loadComponent: () => import('./patient/upcoming-appointements/upcoming-appointements.page').then( m => m.UpcomingAppointementsPage)
+      },
+      {
+        path: 'appointment-details',
+        loadComponent: () => import('./patient/appointment-details/appointment-details.page').then( m => m.AppointmentDetailsPage)
+      },
+    ]
   },
+
+  {
+    path: 'doctor/documents',
+    loadComponent: () => import('./doctor/documents/documents.page').then( m => m.DocumentsPage)
+  },
+  {
+    path: 'doctor/profile',
+    loadComponent: () => import('./doctor/profile/profile.page').then( m => m.ProfilePage)
+  },
+  {
+    path: 'tabs',
+    loadComponent: () => import('./doctor/tabs/tabs.page').then( m => m.TabsPage)
+  },
+
+
   {
     path: 'appointment-follow-up',
     loadComponent: () => import('./doctor/appointment-follow-up/appointment-follow-up.page').then( m => m.AppointmentFollowUpPage)
@@ -112,6 +117,10 @@ export const routes: Routes = [
     path: 'doctor/consultation-form/:id',
     loadComponent: () => import('./doctor/consultation-form/consultation-form.page').then(m => m.ConsultationFormPage)
   },
+
+
+
+
 
 
 

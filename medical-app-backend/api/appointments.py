@@ -30,7 +30,7 @@ def book_appointment():
             patient_id=patient_id,
             doctor_id=doctor_id,
             date=appointment_date,
-            duration=30,
+            duration=45,
             reason=reason
         )
         return jsonify({'message': 'Appointment request created successfully', 'appointmentId': appointment['id']}), 201
@@ -48,6 +48,26 @@ def get_doctor_appointments():
         return jsonify(appointments), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@appointments_bp.route('/appointments/doctor/<doctor_id>', methods=['GET'])
+@firebase_auth_required
+@role_required('patient')
+def get_appointment_by_doctorId(doctor_id):
+    try:
+        status_prams = request.args.get('status')
+        status_list = status_prams.split(',')
+
+        all_appointments = []
+        for status in status_list:
+            all_appointments += get_appointments_by_doctor(doctor_id, status)
+
+        return jsonify(all_appointments), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 
 @appointments_bp.route('/appointments/patient', methods=['GET'])
 @firebase_auth_required

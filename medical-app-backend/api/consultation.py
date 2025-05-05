@@ -62,6 +62,21 @@ def get_consultation_by_appointment_endpoint(appointment_id):
 
     return jsonify(consultation), 200
 
+@consultation_bp.route('/patient/consultation/appointment/<appointment_id>', methods=['GET'])
+@firebase_auth_required
+@role_required('patient')
+def get_consultation_by_appointment_endpoint_patient(appointment_id):
+    patient_id = request.user['sub']
+    consultations = find_consultations_by_appointment(appointment_id)
+    if not consultations:
+        return jsonify({'error': 'Consultation not found'}), 404
+
+    consultation = consultations[0]
+    if consultation['patientId'] != patient_id:
+        return jsonify({'error': 'Unauthorized: Not your consultation'}), 403
+
+    return jsonify(consultation), 200
+
 @consultation_bp.route('/consultations', methods=['GET'])
 @firebase_auth_required
 @role_required('doctor')

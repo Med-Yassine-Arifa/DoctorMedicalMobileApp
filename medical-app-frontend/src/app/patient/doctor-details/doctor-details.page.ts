@@ -5,6 +5,8 @@ import { IonicModule, ToastController } from '@ionic/angular';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { AppointmentService } from '../../services/appointment.service';
 import {FormsModule} from "@angular/forms";
+import {PatientService} from "../../services/patient.service";
+import {Appointment} from "../../models/appointment.model";
 
 @Component({
   selector: 'app-doctor-details',
@@ -20,49 +22,131 @@ import {FormsModule} from "@angular/forms";
   standalone: true
 })
 export class DoctorDetailsPage implements OnInit {
-  doctor: (DoctorUser & { image: string; distance: string; rating: number }) | null = null;
-  dates: { day: number; label: string }[] = [];
-  times: string[] = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
-  selectedDate: number | null = null;
+  doctor:  DoctorUser | null = null;
+  isLoading = true;
+  highlightedDates: { date: string; textColor: string; backgroundColor: string }[] = [];
+  times: string[] = [];
+  selectedDate: string | null = null;
   selectedTime: string | null = null;
   reason: string = '';
-  isLoading: boolean = false;
   errorMessage: string = '';
 
   constructor(
     private route: ActivatedRoute,
+    private patientService: PatientService,
     private router: Router,
     private appointmentService: AppointmentService,
     private toastController: ToastController
   ) {}
 
   ngOnInit() {
-    // Get doctor data from navigation parameters
-    this.route.queryParams.subscribe(params => {
-      if (params['doctor']) {
-        this.doctor = JSON.parse(params['doctor']);
-      }
-    });
+    const doctorId = this.route.snapshot.queryParams['doctorId'];
+    if (doctorId) {
+      this.patientService.getDoctor(doctorId).subscribe(
+        (doctor) => {
+          this.doctor = ({
+            ...doctor,
+            image : history.state.doctor.image,
+            distance: history.state.doctor.distance,
+            rating: history.state.doctor.rating
+          })
 
-    // Generate dates starting from today (April 30, 2025)
-    const today = new Date('2025-04-30');
-    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    for (let i = 0; i < 5; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      this.dates.push({
-        day: date.getDate(),
-        label: dayLabels[date.getDay()]
-      });
+          this.generateHighlightedDates();
+          this.isLoading = false;
+        },
+        (error) => {
+          this.errorMessage = 'Failed to load doctor details.';
+          this.isLoading = false;
+        }
+      );
+    } else {
+      this.errorMessage = 'Doctor ID not provided.';
+      this.isLoading = false;
     }
   }
 
-  selectDate(day: number) {
-    this.selectedDate = this.selectedDate === day ? null : day;
+
+  generateHighlightedDates() {
+    if (!this.doctor || !this.doctor.availability) return;
+
+    const availableDays = this.doctor.availability.map(slot => slot.day);
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setMonth(today.getMonth() + 1); // Limit to one month
+
+    this.highlightedDates = [];
+
+    for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dayName = d.toLocaleString('en-US', { weekday: 'long' });
+      if (availableDays.includes(dayName)) {
+        const dateStr = d.toISOString().split('T')[0];
+        this.highlightedDates.push({
+          date: dateStr,
+          textColor: 'white',
+          backgroundColor: '#28a745' // Green for available days
+        });
+      }
+    }
   }
 
+  onDateChange(event: any) {
+    const selectedDateStr = event.detail.value.split('T')[0]; // e.g., "2025-05-10"
+    this.selectedDate = selectedDateStr;
+    this.times = [];
+    this.selectedTime = null;
+
+    const selectedDateObj = new Date(selectedDateStr);
+    const dayName = selectedDateObj.toLocaleString('en-US', { weekday: 'long' });
+    const availability = this.doctor!.availability.find(slot => slot.day === dayName);
+
+    if (availability) {
+      this.generateTimeSlots(availability.startTime, availability.endTime);
+    }
+  }
+
+  // Generate 1-hour time slots
+  generateTimeSlots(startTime: string, endTime: string) {
+    const start = this.parseTime(startTime);
+    const end = this.parseTime(endTime);
+    const slots: string[] = [];
+    let current = start;
+
+    while (current < end) {
+      slots.push(this.formatTime(current));
+      current += 60; // 1-hour intervals
+    }
+
+    this.appointmentService.getAppointmentDoctorId(this.doctor!.firebaseUid,[ 'confirmed' ,'pending']).subscribe(
+      (appointments: Appointment[]) => {
+        const bookedTimes = appointments
+          .filter((appt) => appt.date.startsWith(this.selectedDate!)) // Match selected date
+          .map((appt) => appt.date.split('T')[1].substring(0, 5)); // Extract time (e.g., "09:00")
+
+        this.times = slots.filter((slot) => !bookedTimes.includes(slot));
+      },
+      (error) => {
+        this.errorMessage = 'Failed to load available time slots.';
+        this.times = slots; // Fallback to all slots if fetch fails
+      }
+    );
+  }
+
+  // Parse time string to minutes
+  parseTime(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  // Format minutes to time string
+  formatTime(minutes: number): string {
+    const hours = (Math.floor(minutes / 60));
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  }
+
+  // Select a time slot
   selectTime(time: string) {
-    this.selectedTime = this.selectedTime === time ? null : time;
+    this.selectedTime = time;
   }
 
   async presentToast(message: string, color: string = 'success') {
@@ -86,13 +170,11 @@ export class DoctorDetailsPage implements OnInit {
       return;
     }
 
-    const appointmentDate = new Date('2025-04-30');
-    appointmentDate.setDate(this.selectedDate);
-    const dateStr = appointmentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const selectedDate = `${this.selectedDate}`;
 
     const appointmentData = {
-      doctorId: this.doctor.firebaseUid,
-      date: dateStr,
+      doctorId: this.doctor!.firebaseUid,
+      date: selectedDate,
       time: this.selectedTime,
       reason: this.reason
     };
@@ -114,8 +196,4 @@ export class DoctorDetailsPage implements OnInit {
     });
   }
 
-  sendMessage() {
-    console.log(`Sending message to ${this.doctor?.profile.firstName} ${this.doctor?.profile.lastName}`);
-    // Placeholder for sending a message
-  }
 }

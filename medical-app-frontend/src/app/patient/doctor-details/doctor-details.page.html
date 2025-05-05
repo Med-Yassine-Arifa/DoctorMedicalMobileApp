@@ -18,7 +18,7 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Doctor Info -->
+  Doctor Info
   <div class="doctor-info" *ngIf="doctor">
     <ion-img [src]="doctor.image" [alt]="doctor.profile.firstName + ' ' + doctor.profile.lastName"></ion-img>
     <h2>{{ doctor.profile.firstName }} {{ doctor.profile.lastName }}</h2>
@@ -38,39 +38,43 @@
   </div>
 
   <!-- Select Date -->
-  <div class="section">
+  <div class="section" *ngIf="doctor">
     <h3>Select Date</h3>
-    <div class="date-picker">
-      <ion-button *ngFor="let date of dates" [ngClass]="{'selected': selectedDate === date.day}" (click)="selectDate(date.day)">
-        <div class="date-button">
-          <div class="day">{{ date.day }}</div>
-          <div class="label">{{ date.label }}</div>
-        </div>
-      </ion-button>
-    </div>
+    <ion-datetime
+      presentation="date"
+      [highlightedDates]="highlightedDates"
+      (ionChange)="onDateChange($event)"
+    ></ion-datetime>
   </div>
 
-  <!-- Select Time -->
-  <div class="section">
+  <!-- Time Slots -->
+  <div class="section" *ngIf="times.length > 0">
     <h3>Select Time</h3>
     <div class="time-picker">
-      <ion-button *ngFor="let time of times" [ngClass]="{'selected': selectedTime === time}" (click)="selectTime(time)">
+      <ion-button
+        *ngFor="let time of times"
+        [ngClass]="{'selected': selectedTime === time}"
+        (click)="selectTime(time)"
+      >
         {{ time }}
       </ion-button>
     </div>
   </div>
 
   <!-- Reason for Appointment -->
-  <div class="section">
+  <div class="section" *ngIf="doctor">
     <h3>Reason for Appointment</h3>
     <ion-item>
-      <ion-input type="text" [(ngModel)]="reason" placeholder="Enter reason for appointment"></ion-input>
+      <ion-input
+        type="text"
+        [(ngModel)]="reason"
+        placeholder="Enter reason for appointment"
+      ></ion-input>
     </ion-item>
   </div>
 
   <!-- Action Buttons -->
-  <div class="action-buttons">
-    <ion-button fill="outline" (click)="sendMessage()">Send Message</ion-button>
+  <div class="action-buttons" *ngIf="doctor">
     <ion-button fill="solid" (click)="bookAppointment()">Book Appointment</ion-button>
   </div>
 </ion-content>

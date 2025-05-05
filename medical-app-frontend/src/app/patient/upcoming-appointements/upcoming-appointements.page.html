@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/patient/patient-dashboard"></ion-back-button>
     </ion-buttons>
-    <ion-title>Medical History</ion-title>
+    <ion-title>Upcoming Appointments</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -18,9 +18,9 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Medical History -->
+  <!-- Upcoming Appointments -->
   <div class="section" *ngIf="!isLoading">
-    <h2>Past Appointments</h2>
+    <h2>Upcoming Appointments</h2>
 
     <!-- Confirmed -->
     <ion-accordion-group>
@@ -32,57 +32,72 @@
           <ion-list *ngIf="confirmedAppointments.length > 0; else noConfirmed">
             <ion-item *ngFor="let appt of confirmedAppointments">
               <ion-label>
-                <ion-button
-                  [routerLink]="['/patient/appointment-details']"
-                  [queryParams]="{appointmentId: appt.id }"
-                  Redirect
-                ></ion-button>
                 <h3>{{ appt.doctorName }}</h3>
                 <p>{{ appt.date | date: 'medium' }}</p>
                 <p>Reason: {{ appt.reason }}</p>
                 <p>Status: {{ appt.status }}</p>
-                <ng-container *ngIf="getConsultationForAppointment(appt.id) as consultation">
-                  <p>Diagnosis: {{ consultation.diagnosis }}</p>
-                  <p *ngIf="consultation.documents.length > 0">
-                  </p>
-
-                </ng-container>
-
+                <!-- Document Upload -->
+                <input
+                  type="file"
+                  #fileInput
+                  (change)="uploadDocument($event, appt.id, appt.doctorId)"
+                  style="display: none"
+                />
+                <ion-button
+                  [routerLink]="['/patient/appointment-details']"
+                  [queryParams]="{ appointmentId: appt.id }"
+                > Redirect
+                </ion-button>
+                <ion-button
+                  size="small"
+                  (click)="fileInput.click()"
+                  [disabled]="isUploading[appt.id]"
+                >
+                  {{ isUploading[appt.id] ? 'Uploading...' : 'Upload Document' }}
+                </ion-button>
+                <!-- Document Links -->
+                <div *ngIf="documents[appt.id] && documents[appt.id].length > 0">
+                  <p>Documents:</p>
+                  <a
+                    *ngFor="let doc of documents[appt.id]"
+                    [routerLink]="['/patient/appointment-details']"
+                    [queryParams]="{ appointmentId: appt.id }"
+                  >
+                    {{ doc.filename }} ({{ doc.status }})
+                  </a>
+                </div>
               </ion-label>
             </ion-item>
           </ion-list>
           <ng-template #noConfirmed>
             <ion-item>
-              <ion-label>No confirmed past appointments.</ion-label>
+              <ion-label>No confirmed upcoming appointments.</ion-label>
             </ion-item>
           </ng-template>
         </div>
       </ion-accordion>
     </ion-accordion-group>
 
-    <!-- Rejected -->
+    <!-- Pending -->
     <ion-accordion-group>
       <ion-accordion value="pending">
         <ion-item slot="header">
-          <ion-label>Rejected ({{ rejectedAppointments.length }})</ion-label>
+          <ion-label>Pending ({{ pendingAppointments.length }})</ion-label>
         </ion-item>
         <div slot="content">
-          <ion-list *ngIf="rejectedAppointments.length > 0; else noPending">
-            <ion-item *ngFor="let appt of rejectedAppointments">
+          <ion-list *ngIf="pendingAppointments.length > 0; else noPending">
+            <ion-item *ngFor="let appt of pendingAppointments">
               <ion-label>
                 <h3>{{ appt.doctorName }}</h3>
                 <p>{{ appt.date | date: 'medium' }}</p>
                 <p>Reason: {{ appt.reason }}</p>
                 <p>Status: {{ appt.status }}</p>
-                <ng-container *ngIf="getConsultationForAppointment(appt.id) as consultation">
-                  <p>Diagnosis: {{ consultation.diagnosis }}</p>
-                </ng-container>
               </ion-label>
             </ion-item>
           </ion-list>
           <ng-template #noPending>
             <ion-item>
-              <ion-label>No pending past appointments.</ion-label>
+              <ion-label>No pending upcoming appointments.</ion-label>
             </ion-item>
           </ng-template>
         </div>
@@ -123,15 +138,5 @@
 
   ion-label p {
     margin: 5px 0;
-  }
-
-  a {
-    color: #007bff;
-    text-decoration: none;
-    margin-right: 10px;
-  }
-
-  a:hover {
-    text-decoration: underline;
   }
 </style>

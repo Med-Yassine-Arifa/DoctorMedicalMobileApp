@@ -1,0 +1,153 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/patient/Upcoming appointments"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Appointment Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Appointment Details -->
+  <div class="section" *ngIf="appointment && !isLoading">
+    <h2>Appointment Information</h2>
+    <ion-card>
+      <ion-card-content>
+        <p><strong>Doctor:</strong> {{ appointment.doctorName }}</p>
+        <p><strong>Date:</strong> {{ appointment.date | date: 'medium' }}</p>
+        <p><strong>Reason:</strong> {{ appointment.reason }}</p>
+        <p><strong>Status:</strong> {{ appointment.status }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Consultations -->
+  <div class="section" *ngIf="!isLoading">
+    <h2>Consultations</h2>
+
+      <ion-item *ngIf="consultations else noConsultations">
+        <ion-label>
+          <h3>Consultation {{ consultations.createdAt| date: 'shortDate' }}</h3>
+          <p>Diagnosis: {{ consultations.diagnosis }}</p>
+          <p>Notes: {{ consultations.notes }}</p>
+          <div *ngIf="consultations.documents.length > 0">
+            <p>Documents:</p>
+            <a
+              *ngFor="let doc of consultations.documents"
+              target="_blank"
+            >
+              {{ doc.original_name }}
+            </a>
+          </div>
+        </ion-label>
+      </ion-item>
+    <ng-template #noConsultations>
+      <ion-item>
+        <ion-label>No consultations for this appointment.</ion-label>
+      </ion-item>
+    </ng-template>
+  </div>
+
+  <!-- Documents -->
+  <div class="section" *ngIf="!isLoading">
+    <h2>Uploaded Documents</h2>
+    <!-- Upload Document -->
+    <input
+      type="file"
+      #fileInput
+      (change)="uploadDocument($event)"
+      style="display: none"
+    />
+    <ion-button
+      size="small"
+      (click)="fileInput.click()"
+      [disabled]="isUploading"
+    >
+      {{ isUploading ? 'Uploading...' : 'Upload Document' }}
+    </ion-button>
+    <!-- Document List -->
+    <ion-list *ngIf="documents.length > 0; else noDocuments">
+      <ion-item *ngFor="let doc of documents">
+        <ion-label>
+          <h3>{{ doc.filename }}</h3>
+          <p>Status: {{ doc.status }}</p>
+          <p>Uploaded: {{ doc.createdAt | date: 'medium' }}</p>
+          <ion-button size="small" (click)="downloadDocument(doc)">Download</ion-button>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+    <ng-template #noDocuments>
+      <ion-item>
+        <ion-label>No documents uploaded.</ion-label>
+      </ion-item>
+    </ng-template>
+  </div>
+</ion-content>
+
+<style>
+  .loading-spinner {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .error-message {
+    color: red;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .section {
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+
+  ion-card {
+    margin: 0;
+  }
+
+  ion-card-content p {
+    margin: 5px 0;
+  }
+
+  ion-list {
+    margin-top: 10px;
+  }
+
+  ion-item {
+    --padding-start: 10px;
+    --padding-end: 10px;
+  }
+
+  ion-label p {
+    margin: 5px 0;
+  }
+
+  ion-button {
+    margin-top: 10px;
+  }
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 10px;
+    display: block;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>

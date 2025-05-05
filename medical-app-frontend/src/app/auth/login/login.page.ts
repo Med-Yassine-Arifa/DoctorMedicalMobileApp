@@ -73,9 +73,9 @@ export class LoginPage {
       next: (user) => {
         this.isLoading = false;
         if (user.role === 'patient') {
-          this.router.navigate(['/patient/patient-dashboard']);
+          this.router.navigate(['/patient']);
         } else if (user.role === 'doctor') {
-          this.router.navigate(['/doctor/documents']);
+          this.router.navigate(['/doctor/appointments']);
         } else if (user.role === 'admin') {
 
           this.router.navigate(['/admin/dashboard']);
