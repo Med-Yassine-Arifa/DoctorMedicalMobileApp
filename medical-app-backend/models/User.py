@@ -121,6 +121,9 @@ def update_user(firebase_uid, updates):
         if 'availability' in updates:
             update_data['availability'] = updates['availability']
 
+        if 'fcmToken' in updates:
+            update_data['fcmToken'] = updates['fcmToken']
+
         # Set updated timestamp
         update_data['updatedAt'] = datetime.now(UTC)
 

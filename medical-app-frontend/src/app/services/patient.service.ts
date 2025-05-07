@@ -50,7 +50,7 @@ export class PatientService {
           try {
             const decoded = JSON.parse(atob(token.split('.')[1]));
             console.log('Token Timestamps:', {
-              iat: new Date(decoded.iat * 1000).toISOString(),
+              iat: new Date(decoded.iat * 1000 - 60000).toISOString(),
               exp: new Date(decoded.exp * 1000).toISOString(),
               clientTime: new Date().toISOString()
             });
@@ -96,7 +96,12 @@ export class PatientService {
           : `${this.apiUrl}/doctors`;
         return this.http.get<DoctorUser[]>(url, { headers }).pipe(
           catchError(error => {
-            console.error('Error fetching popular doctors:', error);
+            console.error('HTTP error response:', {
+              status: error.status,
+              statusText: error.statusText,
+              message: error.message,
+              errorBody: error.error
+            });
             return throwError(() => new Error('Failed to fetch popular doctors'));
           })
         );

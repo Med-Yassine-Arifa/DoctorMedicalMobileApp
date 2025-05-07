@@ -1,5 +1,5 @@
 ﻿from urllib import request
-from venv import logger
+
 
 from flask import Flask
 from flask_mail import Mail
@@ -26,23 +26,20 @@ firebase_admin.initialize_app(cred)
 # Initialize extensions
 mail = Mail(app)
 
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
-CORS(app, resources={r"/api/*": {
-        "origins": ["http://localhost:8100", "http://192.168.43.23:8100", "*"],
-    }})
 
 
 @app.route('/')
-def home():
-    print(request.headers)
+def ping():
+    return "pong"
+
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 app.register_blueprint(patient_bp, url_prefix='/api')
 app.register_blueprint(appointments_bp, url_prefix='/api')
 app.register_blueprint(consultation_bp, url_prefix='/api/consultation')
-
-
 
 
 

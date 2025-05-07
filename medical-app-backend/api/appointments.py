@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+
 from middleware.auth_middleware import firebase_auth_required
 from middleware.role_middleware import role_required
 from models.Appointments import (
@@ -6,6 +7,8 @@ from models.Appointments import (
     update_appointment_status, get_appointment_by_id
 )
 from datetime import datetime, UTC
+
+from models.User import get_user_full_name
 
 appointments_bp = Blueprint('appointments', __name__)
 
@@ -114,6 +117,9 @@ def update_appointment_status_endpoint(appointment_id):
         updated = update_appointment_status(appointment_id, status)
         if not updated:
             return jsonify({'error': 'Failed to update appointment status'}), 500
+
+        appointment = get_appointment_by_id(appointment_id)
+
 
         return jsonify({'message': 'Appointment status updated successfully'}), 200
     except Exception as e:

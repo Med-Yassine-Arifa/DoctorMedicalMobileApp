@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify, send_file
+
+
 from middleware.auth_middleware import firebase_auth_required
 from middleware.role_middleware import role_required
 from services.consultation_service import create_new_consultation, get_consultation, get_doctor_consultations, get_patient_consultations, update_existing_consultation, delete_existing_consultation
@@ -36,6 +38,14 @@ def create_consultation_endpoint():
     consultation, error = create_new_consultation(consultation_data, doctor_id, files)
     if error:
         return jsonify({'error': error}), 400
+
+    create_notification(
+        user_id=consultation['patientId'],
+        message="A new consultation has been added for your appointment.",
+        type='consultation',
+        data={'appointmentId': consultation['appointmentId'], 'consultationId': consultation['id']}
+    )
+
     return jsonify(consultation), 201
 @consultation_bp.route('/consultations/<consultation_id>', methods=['GET'])
 @firebase_auth_required
@@ -116,6 +126,14 @@ def update_consultation_endpoint(consultation_id):
         'notes': data.get('notes')
     }
     success, error = update_existing_consultation(consultation_id, updates, doctor_id)
+    consultation = find_consultation_by_id(consultation_id)
+    if consultation:
+        create_notification(
+            user_id=consultation['patientId'],
+            message="A consultation for your appointment has been updated.",
+            type='consultation',
+            data={'appointmentId': consultation['appointmentId'], 'consultationId': consultation_id}
+        )
     if error:
         return jsonify({'error': error}), 404 if error == "Consultation not found" else 403
     return jsonify({'message': 'Consultation updated successfully'}), 200
@@ -125,9 +143,17 @@ def update_consultation_endpoint(consultation_id):
 @role_required('doctor')
 def delete_consultation_endpoint(consultation_id):
     doctor_id = request.user['sub']
+    consultation = find_consultation_by_id(consultation_id)
     success, error = delete_existing_consultation(consultation_id, doctor_id)
     if error:
         return jsonify({'error': error}), 404 if error == "Consultation not found" else 403
+
+    create_notification(
+        user_id=consultation['patientId'],
+        message="A consultation for your appointment has been deleted.",
+        type='consultation',
+        data={'appointmentId': consultation['appointmentId'], 'consultationId': consultation_id}
+    )
     return jsonify({'message': 'Consultation deleted successfully'}), 200
 
 @consultation_bp.route('/consultations/<consultation_id>/documents/<filename>', methods=['GET'])
@@ -150,6 +176,14 @@ def download_document(consultation_id, filename):
         file_path = document['path']
         if not os.path.exists(file_path):
             return jsonify({'error': 'File not found on server'}), 404
+
+        create_notification(
+            user_id=consultation['patientId'],
+            message=f"Your document '{document['original_name']}' was downloaded by the doctor.",
+            type='document',
+            data={'appointmentId': consultation['appointmentId'], 'consultationId': consultation_id,
+                  'documentId': document['filename']}
+        )
 
         return send_file(file_path, as_attachment=True, download_name=document['original_name'])
     except Exception as e:

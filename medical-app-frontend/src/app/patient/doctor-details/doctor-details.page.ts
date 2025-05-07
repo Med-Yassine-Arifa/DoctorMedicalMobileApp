@@ -41,6 +41,7 @@ export class DoctorDetailsPage implements OnInit {
 
   ngOnInit() {
     const doctorId = this.route.snapshot.queryParams['doctorId'];
+    console.log('Doctor ID:', doctorId, 'History state:', history.state);
     if (doctorId) {
       this.patientService.getDoctor(doctorId).subscribe(
         (doctor) => {

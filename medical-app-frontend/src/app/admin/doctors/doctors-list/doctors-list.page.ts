@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { DoctorService } from '../../../services/doctor.service';
 import { AuthService } from '../../../services/auth.service';
@@ -19,13 +19,23 @@ import { DoctorUser } from '../../../models/user.model';
 import { InfiniteScrollCustomEvent } from '@ionic/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import {
+  IonButton,
+  IonButtons,
+  IonContent, IonFab, IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonInfiniteScroll, IonInfiniteScrollContent,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-doctors-list',
   templateUrl: './doctors-list.page.html',
   styleUrls: ['./doctors-list.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonContent, IonInfiniteScroll, IonInfiniteScrollContent, IonFabButton, IonFab]
 })
 export class DoctorsListPage implements OnInit, OnDestroy {
   doctors: DoctorUser[] = [];
@@ -76,6 +86,7 @@ export class DoctorsListPage implements OnInit, OnDestroy {
         this.loadDoctors();
       }
     });
+
   }
 
   ngOnInit() {
@@ -102,13 +113,13 @@ export class DoctorsListPage implements OnInit, OnDestroy {
       this.router.navigateByUrl('/auth/login', { replaceUrl: true });
       return;
     }
-
+    this.isLoading = true;
     const loading = await this.loadingController.create({
       message: 'Loading doctors...',
       spinner: 'circles'
     });
     await loading.present();
-    this.isLoading = true;
+
     this.doctorService.getAllDoctors().subscribe({
       next: (doctors) => {
         console.log('Doctors loaded:', doctors.length);

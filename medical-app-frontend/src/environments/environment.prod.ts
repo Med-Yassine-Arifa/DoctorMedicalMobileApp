@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://10.0.2.2:5000/api',
+  apiUrl: 'http://192.168.43.23:5000/api',
   firebase :{
     apiKey: "AIzaSyA-SWuQLuueBc1E5rbSX_lSaPnihChbzaQ",
     authDomain: "medicalapp-c2e4a.firebaseapp.com",

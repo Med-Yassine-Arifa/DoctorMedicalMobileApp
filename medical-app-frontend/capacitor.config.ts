@@ -8,13 +8,14 @@ const config: CapacitorConfig = {
     "CapacitorSQLite": {
       "iosDatabaseLocation": "Library",
       "androidDatabaseLocation": "default"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
     }
   },
   server: {
-    url: 'http://10.0.2.2:5000',  // Force all requests (API + assets) to this URL
+    androidScheme: 'http',
     cleartext: true,
-    allowNavigation: ['*']
-
   },
 };
 

@@ -4,16 +4,25 @@ import { Consultation } from '../../models/consultation.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Appointment } from '../../models/appointment.model';
+import {
+  IonButton,
+  IonContent,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonSpinner,
+  IonTextarea
+} from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-consultation-form',
   templateUrl: './consultation-form.page.html',
   styleUrls: ['./consultation-form.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule, ReactiveFormsModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonContent, IonItem, IonLabel, IonInput, IonTextarea, IonList, IonButton, IonSpinner]
 })
 export class ConsultationFormPage implements OnInit {
   @Input() appointment: Appointment | null = null;

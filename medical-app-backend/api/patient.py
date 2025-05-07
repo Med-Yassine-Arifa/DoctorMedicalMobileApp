@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from middleware.auth_middleware import firebase_auth_required
 from middleware.role_middleware import role_required
-from models.User import get_popular_doctors, get_all_doctors_patient, search_doctors, find_user_by_id
+from models.User import get_popular_doctors, get_all_doctors_patient, search_doctors, find_user_by_id, update_user
 
 patient_bp = Blueprint('patient', __name__)
 
@@ -48,3 +48,4 @@ def search_doctors_endpoint():
         return jsonify(doctors), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+

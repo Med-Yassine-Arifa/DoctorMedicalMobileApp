@@ -63,10 +63,7 @@ export const routes: Routes = [
         path: 'doctor-details',
         loadComponent: () => import('./patient/doctor-details/doctor-details.page').then(m => m.DoctorDetailsPage)
       },
-      {
-        path: 'notifications',
-        loadComponent: () => import('./patient/notifications/notifications.page').then(m => m.NotificationsPage)
-      },
+
       {
         path: 'medical history',
         loadComponent: () => import('./patient/medical-history/medical-history.page').then(m => m.MedicalHistoryPage)
@@ -81,11 +78,6 @@ export const routes: Routes = [
       },
     ]
   },
-
-  {
-    path: 'doctor/documents',
-    loadComponent: () => import('./doctor/documents/documents.page').then( m => m.DocumentsPage)
-  },
   {
     path: 'doctor/profile',
     loadComponent: () => import('./doctor/profile/profile.page').then( m => m.ProfilePage)
@@ -94,9 +86,7 @@ export const routes: Routes = [
     path: 'tabs',
     loadComponent: () => import('./doctor/tabs/tabs.page').then( m => m.TabsPage)
   },
-
-
-  {
+ {
     path: 'appointment-follow-up',
     loadComponent: () => import('./doctor/appointment-follow-up/appointment-follow-up.page').then( m => m.AppointmentFollowUpPage)
   },

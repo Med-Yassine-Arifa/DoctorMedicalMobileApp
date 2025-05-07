@@ -7,7 +7,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding" scroll-y="true">
   <ion-spinner *ngIf="isLoading" name="crescent" class="ion-margin"></ion-spinner>
 
   <ion-card *ngIf="errorMessage" color="danger">
@@ -91,11 +91,11 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="showConsultationForm && appointment && !isLoading" class="full-height-card">
+  <ion-card *ngIf="showConsultationForm && appointment && !isLoading" class="consultation-form-card">
     <ion-card-header>
       <ion-card-title>{{ consultation ? 'Edit Consultation' : 'Add Consultation' }}</ion-card-title>
     </ion-card-header>
-    <ion-card-content>
+    <ion-card-content class="form-content">
       <app-consultation-form
         [appointment]="appointment"
         [consultation]="consultation"

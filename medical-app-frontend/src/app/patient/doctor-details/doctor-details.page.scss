@@ -121,6 +121,7 @@ ion-datetime .highlighted-date {
   background-color: #28a745 !important;
   color: white !important;
   border-radius: 50%;
+
 }
 
 /* Style for time picker buttons */
@@ -172,4 +173,11 @@ ion-datetime .highlighted-date {
   display: flex;
   justify-content: center;
   gap: 10px;
+}
+
+.section {
+  display: block !important; /* Ensure sections are visible */
+}
+ion-datetime, ion-input, ion-button {
+  visibility: visible !important; /* Ensure components are visible */
 }
